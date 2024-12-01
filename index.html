@@ -7,12 +7,47 @@
     <style>
         body { font-family: Arial, sans-serif; }
         #searchContainer { margin: 20px; }
-        iframe { width: 100%; height: 100vh; border: none; }
+        #searchInput { width: 80%; padding: 10px; }
+        #searchButton { padding: 10px; }
+        #results { margin: 20px; }
+        iframe { width: 100%; height: 360px; }
     </style>
 </head>
 <body>
     <div id="searchContainer">
-        <iframe id="youtubeViewer" src="https://www.youtube.com" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <input id="searchInput" type="text" placeholder="Tìm kiếm video trên YouTube">
+        <button id="searchButton">Tìm kiếm</button>
     </div>
+    <div id="results"></div>
+
+    <script>
+        async function searchYouTube() {
+            const query = document.getElementById('searchInput').value;
+            const response = await fetch('https://your-backend-url/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            const videos = await response.json();
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            videos.forEach(video => {
+                const videoElement = `
+                    <div>
+                        <h3>${video.title}</h3>
+                        <iframe src="https://www.youtube.com/embed/${video.videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <p><a href="${video.url}" target="_blank" onclick="postURL('${video.url}')">${video.url}</a></p>
+                    </div>
+                `;
+                results.innerHTML += videoElement;
+            });
+        }
+
+        function postURL(url) {
+            ThunkableWebviewerExtension.postMessage(url);
+        }
+
+        document.getElementById('searchButton').addEventListener('click', searchYouTube);
+    </script>
 </body>
 </html>

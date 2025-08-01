@@ -1,10 +1,38 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Trang của tôi</title>
-  </head>
-  <body>
-    <h1>Xin chào!</h1>
-    <p>Đây là trang web đầu tiên của tôi trên GitHub Pages.</p>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>MQTT Web Client</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+  <h1>MQTT Web Client</h1>
+  <p>Status: <span id="status">Disconnected</span></p>
+
+  <input id="msg" placeholder="Type message">
+  <button onclick="sendMessage()">Send</button>
+
+  <ul id="messages"></ul>
+
+  <script>
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+    const topic = "my/mqtt/test";
+
+    client.on("connect", () => {
+      document.getElementById("status").textContent = "Connected";
+      client.subscribe(topic);
+    });
+
+    client.on("message", (topic, message) => {
+      const li = document.createElement("li");
+      li.textContent = message.toString();
+      document.getElementById("messages").appendChild(li);
+    });
+
+    function sendMessage() {
+      const msg = document.getElementById("msg").value;
+      client.publish(topic, msg);
+    }
+  </script>
+</body>
 </html>

@@ -15,42 +15,31 @@
   <ul id="messages"></ul>
 
   <script>
+    // ✅ Kết nối tới HiveMQ WebSocket
     const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
-    const topic = "my/mqtt/test";
 
+    // ✅ Subscribe các topic từ ESP32
     client.on("connect", () => {
+      console.log("Web connected to MQTT");
       document.getElementById("status").textContent = "Connected";
-      client.subscribe(topic);
+      client.subscribe("23127263/esp32/temperature");
+      client.subscribe("23127263/esp32/humidity");
     });
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-<script>
-const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
 
-client.on("connect", () => {
-  console.log("Web connected to MQTT");
-  client.subscribe("23127263/esp32/temperature");
-  client.subscribe("23127263/esp32/humidity");
-});
-
-client.on("message", (topic, message) => {
-  console.log("Message from:", topic);
-  console.log("Data:", message.toString());
-
-  const li = document.createElement("li");
-  li.textContent = `[${topic}] ${message}`;
-  document.getElementById("messages").appendChild(li);
-});
-</script>
-
+    // ✅ Nhận dữ liệu và hiển thị ra màn hình
     client.on("message", (topic, message) => {
+      console.log("Message from:", topic);
+      console.log("Data:", message.toString());
+
       const li = document.createElement("li");
-      li.textContent = message.toString();
+      li.textContent = `[${topic}] ${message}`;
       document.getElementById("messages").appendChild(li);
     });
 
+    // ✅ Gửi tin nhắn từ web (không bắt buộc)
     function sendMessage() {
       const msg = document.getElementById("msg").value;
-      client.publish(topic, msg);
+      client.publish("23127263/esp32/temperature", msg);
     }
   </script>
 </body>

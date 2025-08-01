@@ -22,6 +22,25 @@
       document.getElementById("status").textContent = "Connected";
       client.subscribe(topic);
     });
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script>
+const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+client.on("connect", () => {
+  console.log("Web connected to MQTT");
+  client.subscribe("23127263/esp32/temperature");
+  client.subscribe("23127263/esp32/humidity");
+});
+
+client.on("message", (topic, message) => {
+  console.log("Message from:", topic);
+  console.log("Data:", message.toString());
+
+  const li = document.createElement("li");
+  li.textContent = `[${topic}] ${message}`;
+  document.getElementById("messages").appendChild(li);
+});
+</script>
 
     client.on("message", (topic, message) => {
       const li = document.createElement("li");

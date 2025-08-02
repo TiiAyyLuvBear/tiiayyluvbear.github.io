@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard IoT</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -12,6 +13,7 @@
       padding: 0;
       background-color: #f0f4f8;
     }
+    .tab { display: none; }
     header {
       background-color: #77a8c6;
       padding: 10px 20px;
@@ -109,64 +111,192 @@
     .icon {
       font-size: 18px;
     }
+
+    /* Đăng nhập */
+    #loginTab {
+      padding: 50px;
+      text-align: center;
+    }
+    #loginTab input {
+      padding: 10px;
+      margin: 10px;
+      width: 200px;
+    }
+    #loginTab button {
+      padding: 10px 20px;
+      font-weight: bold;
+    }
+    #chartTab {
+      padding: 20px;
+      text-align: center;
+    }
+    canvas {
+      max-width: 90%;
+      height: 300px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="left-header">
-      <button>Thống kê</button>
-    </div>
-    <div class="right-header">
-      <button>username</button>
-      <button>Đăng xuất</button>
-      <span class="icon">🔔</span>
-    </div>
-  </header>
 
-  <div class="container">
-    <div class="column">
-      <h2>Trạng thái hiện tại</h2>
-      <div class="status-grid">
-        <div class="status-box" id="tempBox">🌡️ Nhiệt độ:<br>--&deg; C</div>
-        <div class="status-box" id="humiBox">💧 Độ ẩm:<br>--%</div>
-        <div class="status-box">💡 Ánh sáng:<br>800 lx</div>
-        <div class="status-box">👤 Trạng thái:<br>Có người</div>
+  <!-- Tab Đăng Nhập -->
+  <div id="loginTab" class="tab">
+    <h2>Đăng nhập</h2>
+    <input id="username" placeholder="Tên đăng nhập">
+    <input id="password" type="password" placeholder="Mật khẩu">
+    <br>
+    <button id="loginBtn">Đăng nhập</button>
+  </div>
+
+  <!-- Tab Dashboard -->
+  <div id="dataTab" class="tab">
+    <header>
+      <div class="left-header">
+        <button id="chartBtn">Thống kê</button>
       </div>
-    </div>
-    <div class="column">
-      <h2>Điều khiển <span class="icon">⚙️</span></h2>
-      <div class="control-box">
-        <div>🌀 Quạt</div>
-        <div class="toggle-switch on"></div>
+      <div class="right-header">
+        <button>admin</button>
+        <button id="logoutBtn">Đăng xuất</button>
+        <span class="icon">🔔</span>
       </div>
-      <div class="control-box">
-        <div>💡 Đèn</div>
-        <div class="toggle-switch"></div>
+    </header>
+
+    <div class="container">
+      <div class="column">
+        <h2>Trạng thái hiện tại</h2>
+        <div class="status-grid">
+          <div class="status-box" id="tempBox">🌡️ Nhiệt độ:<br>--&deg; C</div>
+          <div class="status-box" id="humiBox">💧 Độ ẩm:<br>--%</div>
+          <div class="status-box">💡 Ánh sáng:<br>800 lx</div>
+          <div class="status-box">👤 Trạng thái:<br>Có người</div>
+        </div>
       </div>
-      <div class="auto-toggle">
-        Tự động bật/tắt ✅
+      <div class="column">
+        <h2>Điều khiển <span class="icon">⚙️</span></h2>
+        <div class="control-box">
+          <div>🌀 Quạt</div>
+          <div class="toggle-switch on"></div>
+        </div>
+        <div class="control-box">
+          <div>💡 Đèn</div>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="auto-toggle">
+          Tự động bật/tắt ✅
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Tab Biểu đồ -->
+  <div id="chartTab" class="tab">
+    <h2>Biểu đồ nhiệt độ và độ ẩm</h2>
+    <canvas id="myChart"></canvas>
+    <br>
+    <button id="backBtn">⬅ Quay lại</button>
+  </div>
+
+  <!-- JavaScript OOP -->
   <script>
-    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
-
-    client.on("connect", () => {
-      console.log("Connected to MQTT broker");
-      client.subscribe("23127263/esp32/temperature");
-      client.subscribe("23127263/esp32/humidity");
-    });
-
-    client.on("message", (topic, message) => {
-      const value = message.toString();
-      if (topic.includes("temperature")) {
-        document.getElementById("tempBox").innerHTML = `🌡️ Nhiệt độ:<br>${value}&deg; C`;
+    class App {
+      constructor() {
+        this.loginManager = new LoginManager(this);
+        this.mqttManager = new MQTTManager();
+        this.chartManager = new ChartManager();
       }
-      if (topic.includes("humidity")) {
-        document.getElementById("humiBox").innerHTML = `💧 Độ ẩm:<br>${value}%`;
+
+      init() {
+        this.showTab("loginTab");
+        this.loginManager.setup();
+        this.mqttManager.connect();
+
+        document.getElementById("chartBtn").onclick = () => this.showTab("chartTab");
+        document.getElementById("backBtn").onclick = () => this.showTab("dataTab");
+        document.getElementById("logoutBtn").onclick = () => this.showTab("loginTab");
       }
-    });
+
+      showTab(tabId) {
+        document.querySelectorAll('.tab').forEach(tab => tab.style.display = 'none');
+        document.getElementById(tabId).style.display = 'block';
+        if (tabId === 'chartTab') {
+          this.chartManager.loadChart();
+        }
+      }
+    }
+
+    class LoginManager {
+      constructor(app) {
+        this.app = app;
+      }
+
+      setup() {
+        document.getElementById("loginBtn").onclick = () => this.login();
+      }
+
+      login() {
+        const u = document.getElementById("username").value;
+        const p = document.getElementById("password").value;
+        if (u === "admin" && p === "123") {
+          this.app.showTab("dataTab");
+        } else {
+          alert("Sai tài khoản hoặc mật khẩu");
+        }
+      }
+    }
+
+    class MQTTManager {
+      connect() {
+        const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+        client.on("connect", () => {
+          console.log("MQTT connected");
+          client.subscribe("23127263/esp32/temperature");
+          client.subscribe("23127263/esp32/humidity");
+        });
+        client.on("message", (topic, message) => {
+          const value = message.toString();
+          if (topic.includes("temperature")) {
+            document.getElementById("tempBox").innerHTML = `🌡️ Nhiệt độ:<br>${value}&deg; C`;
+          }
+          if (topic.includes("humidity")) {
+            document.getElementById("humiBox").innerHTML = `💧 Độ ẩm:<br>${value}%`;
+          }
+        });
+      }
+    }
+
+    class ChartManager {
+      async loadChart() {
+        try {
+          const res = await fetch('https://<project-id>.firebaseio.com/sensor.json');
+          const data = await res.json();
+          const labels = [], temps = [], hums = [];
+
+          Object.keys(data).forEach(key => {
+            labels.push(data[key].time || key);
+            temps.push(data[key].temperature);
+            hums.push(data[key].humidity);
+          });
+
+          const ctx = document.getElementById("myChart").getContext("2d");
+          new Chart(ctx, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                { label: "Nhiệt độ", data: temps, borderColor: "red", fill: false },
+                { label: "Độ ẩm", data: hums, borderColor: "blue", fill: false }
+              ]
+            }
+          });
+        } catch (err) {
+          console.error("Lỗi khi tải dữ liệu biểu đồ:", err);
+        }
+      }
+    }
+
+    window.onload = () => {
+      const app = new App();
+      app.init();
+    };
   </script>
 </body>
 </html>

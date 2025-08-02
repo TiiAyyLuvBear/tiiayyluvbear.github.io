@@ -1,0 +1,31 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #eef3f9;
+}
+.tab-bar {
+  display: flex;
+  background: #5986c8;
+  padding: 10px;
+}
+.tab-bar button {
+  flex: 1;
+  padding: 10px;
+  font-weight: bold;
+  background: #ccc;
+  border: none;
+  cursor: pointer;
+}
+.tab {
+  display: none;
+  padding: 20px;
+}
+.tab.active {
+  display: block;
+}
+input {
+  display: block;
+  margin: 10px 0;
+  padding: 8px;
+}

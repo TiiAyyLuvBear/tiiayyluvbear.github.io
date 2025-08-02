@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "author": "Anh Vũ Thế",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -76.8, "left": -91.16, "attrs": {} },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -224,
+      "left": -282.4,
+      "attrs": { "pins": "i2c" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "lcd1:GND", "esp:GND.1", "black", [ "h-38.4", "v192", "h230.25" ] ],
+    [ "lcd1:VCC", "esp:5V", "red", [ "h-76.8", "v211.3", "h268.65" ] ],
+    [ "lcd1:SDA", "esp:21", "green", [ "v-76.6", "h316.8", "v249.6" ] ],
+    [ "lcd1:SCL", "esp:22", "green", [ "h-19.2", "v-124.5", "h364.8", "v259.2" ] ]
+  ],
+  "dependencies": {}
+}

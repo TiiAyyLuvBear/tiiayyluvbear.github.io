@@ -1,4 +1,4 @@
-class MqttHandler {
+export class MqttHandler {
   constructor() {
     this.client = null;
   }

@@ -1,4 +1,4 @@
-class ChartDrawer {
+export class ChartDrawer {
   constructor() {
     // Cấu hình Firebase
     const firebaseConfig = {

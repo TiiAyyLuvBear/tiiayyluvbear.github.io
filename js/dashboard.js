@@ -57,5 +57,31 @@ export class MqttHandler {
 
   init(callbackOnLogout) {
     this.logout(callbackOnLogout);
+
+    const overlay = document.getElementById("thresholdOverlay");
+    const fanInput = document.getElementById("fanThreshold");
+    const fanValue = document.getElementById("fanValue");
+    const lightInput = document.getElementById("lightThreshold");
+    const lightValue = document.getElementById("lightValue");
+    const closePopupBtn = document.getElementById("closePopup");
+
+    const controlBtns = document.querySelectorAll(".control-btn.openThresholdBtn");
+    controlBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        overlay.classList.add("active");
+      });
+    });
+
+    closePopupBtn?.addEventListener("click", () => {
+      overlay.classList.remove("active");
+    });
+
+    fanInput?.addEventListener("input", () => {
+      fanValue.textContent = fanInput.value;
+    });
+
+    lightInput?.addEventListener("input", () => {
+      lightValue.textContent = lightInput.value;
+    });
   }
 }

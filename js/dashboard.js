@@ -15,7 +15,8 @@ export class MqttHandler {
       console.log("Connected MQTT");
       this.client.subscribe("23127263/esp32/temperature");
       this.client.subscribe("23127263/esp32/humidity");
-      this.client.subscribe("23127263/esp32/ldr");
+      this.client.subscribe("23127263/esp32/light");
+      this.client.subscribe("23127263/esp32/motion");
     });
 
     this.client.on("message", (topic, message) => {
@@ -26,10 +27,11 @@ export class MqttHandler {
       if (topic.includes("humidity")) {
         document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${value} %`;
       }
-      if (topic.includes("ldr")){
-        document.getElementById("lightBox").innerHTML = ` Độ sáng: ${value} lx`;
+      if (topic.includes("light")) {
+        document.getElementById("lightBox").innerHTML = ` Độ sáng: ${value} %`;
+      }
+      if (topic.includes("motion")) {
         document.getElementById("statusBox").innerHTML = ` Trạng thái: ${value}`;
-
       }
     });
   }

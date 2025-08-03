@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,11 @@
       padding: 0;
       background-color: #f0f4f8;
     }
-    .tab { display: none; }
+
+    .tab {
+      display: none;
+    }
+
     header {
       background-color: #77a8c6;
       padding: 10px 20px;
@@ -21,6 +26,7 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .left-header button {
       padding: 6px 16px;
       background-color: #d6cbf6;
@@ -29,11 +35,13 @@
       cursor: pointer;
       font-weight: bold;
     }
+
     .right-header {
       display: flex;
       align-items: center;
       gap: 10px;
     }
+
     .right-header button {
       padding: 5px 12px;
       border: none;
@@ -41,31 +49,37 @@
       background-color: #bfbce0;
       font-weight: bold;
     }
+
     .container {
       display: flex;
       justify-content: space-around;
       margin-top: 30px;
       padding: 0 40px;
     }
+
     .column {
       width: 45%;
     }
+
     h2 {
       color: #1b2a41;
     }
+
     .status-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 20px;
       margin-top: 10px;
     }
+
     .status-box {
       background-color: #b3d3ee;
       padding: 20px;
       border-radius: 12px;
       font-size: 18px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
+
     .control-box {
       background-color: #b3d3ee;
       padding: 20px;
@@ -73,6 +87,7 @@
       text-align: center;
       margin-bottom: 20px;
     }
+
     .toggle-switch {
       width: 50px;
       height: 25px;
@@ -81,6 +96,7 @@
       position: relative;
       margin: 10px auto;
     }
+
     .toggle-switch::before {
       content: '';
       width: 22px;
@@ -92,12 +108,15 @@
       left: 2px;
       transition: 0.3s;
     }
+
     .on {
       background-color: #4cd964;
     }
+
     .on::before {
       transform: translateX(25px);
     }
+
     .auto-toggle {
       padding: 10px 20px;
       background-color: white;
@@ -108,6 +127,7 @@
       gap: 10px;
       font-weight: bold;
     }
+
     .icon {
       font-size: 18px;
     }
@@ -117,25 +137,30 @@
       padding: 50px;
       text-align: center;
     }
+
     #loginTab input {
       padding: 10px;
       margin: 10px;
       width: 200px;
     }
+
     #loginTab button {
       padding: 10px 20px;
       font-weight: bold;
     }
+
     #chartTab {
       padding: 20px;
       text-align: center;
     }
+
     canvas {
       max-width: 90%;
       height: 300px;
     }
   </style>
 </head>
+
 <body>
 
   <!-- Tab Đăng Nhập -->
@@ -166,8 +191,8 @@
         <div class="status-grid">
           <div class="status-box" id="tempBox">🌡️ Nhiệt độ:<br>--&deg; C</div>
           <div class="status-box" id="humiBox">💧 Độ ẩm:<br>--%</div>
-          <div class="status-box">💡 Ánh sáng:<br>800 lx</div>
-          <div class="status-box">👤 Trạng thái:<br>Có người</div>
+          <div class="status-box" id="lightBox">💡 Ánh sáng:<br>--%</div>
+          <div class="status-box" id="motionBox">👤 Trạng thái:<br>--</div>
         </div>
       </div>
       <div class="column">
@@ -250,6 +275,8 @@
           console.log("MQTT connected");
           client.subscribe("23127263/esp32/temperature");
           client.subscribe("23127263/esp32/humidity");
+          client.subscribe("23127263/esp32/light");
+          client.subscribe("23127263/esp32/motion");
         });
         client.on("message", (topic, message) => {
           const value = message.toString();
@@ -258,6 +285,13 @@
           }
           if (topic.includes("humidity")) {
             document.getElementById("humiBox").innerHTML = `💧 Độ ẩm:<br>${value}%`;
+          }
+          if (topic.includes("light")) {
+            document.getElementById("lightBox").innerHTML = `💡 Ánh sáng:<br>${value}%`;
+          }
+          if (topic.includes("motion")) {
+            const motionStatus = value === "1" ? "Có người" : "Không có người";
+            document.getElementById("motionBox").innerHTML = `👤 Trạng thái:<br>${motionStatus}`;
           }
         });
       }
@@ -274,6 +308,8 @@
             labels.push(data[key].time || key);
             temps.push(data[key].temperature);
             hums.push(data[key].humidity);
+            lights.push(data[key].light);
+            motions.push(data[key].motion);
           });
 
           const ctx = document.getElementById("myChart").getContext("2d");
@@ -283,7 +319,9 @@
               labels,
               datasets: [
                 { label: "Nhiệt độ", data: temps, borderColor: "red", fill: false },
-                { label: "Độ ẩm", data: hums, borderColor: "blue", fill: false }
+                { label: "Độ ẩm", data: hums, borderColor: "blue", fill: false },
+                { label: "Ánh sáng", data: lights, borderColor: "yellow", fill: false },
+                { label: "Chuyển động", data: motions, borderColor: "green", fill: false }
               ]
             }
           });
@@ -299,4 +337,5 @@
     };
   </script>
 </body>
+
 </html>

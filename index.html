@@ -5,81 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard IoT</title>
 
-  <!-- Thư viện bên ngoài -->
+  <!-- Thư viện ngoài -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- Tab Đăng Nhập -->
-  <div id="login" class="tab">
-    <h2>Đăng nhập</h2>
-    <input id="username" placeholder="Tên đăng nhập" />
-    <input id="password" type="password" placeholder="Mật khẩu" />
-    <br />
-    <button id="loginBtn">Đăng nhập</button>
-    <button id="signupBtn">Đăng kí</button>
-  </div>
+  <!-- Nội dung sẽ được load vào đây -->
+  <div id="content"></div>
 
-  <!-- Tab Đăng ký -->
-  <div id="signup" class="tab">
-    <h2>Đăng ký tài khoản</h2>
-    <input id="signupEmail" type="email" placeholder="Email" />
-    <input id="signupPassword" type="password" placeholder="Mật khẩu" />
-    <input id="signupConfirm" type="password" placeholder="Xác nhận mật khẩu" />
-    <br />
-    <button id="submitSignupBtn">Tạo tài khoản</button>
-    <button id="backToLoginBtn">⬅ Quay lại đăng nhập</button>
-  </div>
+  <!-- JavaScript load các file HTML con -->
+  <script>
+    async function loadHTML(file) {
+      const res = await fetch(file);
+      const html = await res.text();
+      document.getElementById('content').insertAdjacentHTML('beforeend', html);
+    }
 
-  <!-- Tab Dashboard -->
-  <div id="dashboard" class="tab">
-    <header>
-      <div class="left-header">
-        <button id="chartBtn">Thống kê</button>
-      </div>
-      <div class="right-header">
-        <button>admin</button>
-        <button id="logoutBtn">Đăng xuất</button>
-        <span class="icon">🔔</span>
-      </div>
-    </header>
-    <div class="container">
-      <div class="column">
-        <h2>Trạng thái hiện tại</h2>
-        <div class="status-grid">
-          <div class="status-box" id="tempBox">🌡️ Nhiệt độ:<br />--&deg; C</div>
-          <div class="status-box" id="humiBox">💧 Độ ẩm:<br />--%</div>
-          <div class="status-box">💡 Ánh sáng:<br />800 lx</div>
-          <div class="status-box">👤 Trạng thái:<br />Có người</div>
-        </div>
-      </div>
-      <div class="column">
-        <h2>Điều khiển ⚙️</h2>
-        <div class="control-box">
-          <div>🌀 Quạt</div>
-          <div class="toggle-switch on"></div>
-        </div>
-        <div class="control-box">
-          <div>💡 Đèn</div>
-          <div class="toggle-switch"></div>
-        </div>
-        <div class="auto-toggle">Tự động bật/tắt ✅</div>
-      </div>
-    </div>
-  </div>
+    // Nạp lần lượt các phần
+    loadHTML('tabs/login.html');
+    loadHTML('tabs/dashboard.html');
+    loadHTML('tabs/chart.html');
+  </script>
 
-  <!-- Tab Biểu đồ -->
-  <div id="chart" class="tab">
-    <h2>Biểu đồ nhiệt độ và độ ẩm</h2>
-    <canvas id="myChart"></canvas>
-    <br />
-    <button id="backBtn">⬅ Quay lại</button>
-  </div>
-
-  <!-- JavaScript Modules -->
+  <!-- JavaScript chính -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

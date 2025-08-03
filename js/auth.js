@@ -1,5 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDc4KzHBVgX4l9VNfFB-oXHALg25qZwW8I",
@@ -11,50 +17,49 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 
 export class Auth {
   constructor() {
     this.auth = auth;
   }
 
+  onAuthStateChanged(callback) {
+    onAuthStateChanged(this.auth, callback);
+  }
+
   setupLogin(callbackOnSuccess) {
     const loginBtn = document.getElementById("loginBtn");
-    loginBtn.addEventListener("click", (event) => {
+    loginBtn?.addEventListener("click", (event) => {
       event.preventDefault();
       const email = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
       signInWithEmailAndPassword(this.auth, email, password)
-        .then((userCredential) => {
-          // alert("Đăng nhập thành công!");
-          callbackOnSuccess(); // Gọi callback để chuyển tab
-        })
+        .then(() => callbackOnSuccess())
         .catch((error) => {
-          alert("Lỗi: " + error.message);
+          console.error(error);
+          alert("Tên đăng nhập hoặc mật khẩu không đúng");
         });
     });
   }
 
- setupSignup() {
+  setupSignup() {
     const showSignupBtn = document.getElementById("signupBtn");
     const submitSignupBtn = document.getElementById("submitSignupBtn");
     const backBtn = document.getElementById("backToLoginBtn");
 
-    // Hiện form đăng ký
-    showSignupBtn.addEventListener("click", () => {
+    showSignupBtn?.addEventListener("click", () => {
       document.getElementById("login").classList.remove("active");
       document.getElementById("signup").classList.add("active");
     });
 
-    // Quay lại đăng nhập
-    backBtn.addEventListener("click", () => {
+    backBtn?.addEventListener("click", () => {
       document.getElementById("signup").classList.remove("active");
       document.getElementById("login").classList.add("active");
-    }); 
+    });
 
-    // Gửi đăng ký
-    submitSignupBtn.addEventListener("click", (e) => {
+    submitSignupBtn?.addEventListener("click", (e) => {
       e.preventDefault();
       const email = document.getElementById("signupEmail").value;
       const pass = document.getElementById("signupPassword").value;
@@ -64,11 +69,23 @@ export class Auth {
 
       createUserWithEmailAndPassword(this.auth, email, pass)
         .then(() => {
-          alert("Đăng ký thành công! Mời đăng nhập.");
+          alert("Đăng ký thành công!");
           document.getElementById("signup").classList.remove("active");
           document.getElementById("login").classList.add("active");
         })
         .catch((error) => alert("Lỗi: " + error.message));
+    });
+  }
+
+  init(callbackOnLoginSuccess) {
+    this.setupLogin(callbackOnLoginSuccess);
+    this.setupSignup();
+  }
+
+  logout(callbackOnSuccess) {
+    signOut(this.auth).then(() => {
+      console.log("Signed out from Firebase");
+      callbackOnSuccess();
     });
   }
 }

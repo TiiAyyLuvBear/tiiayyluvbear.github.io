@@ -34,6 +34,10 @@ export class ChartDrawer {
       });
     });
   }
+
+  init() {
+    this.drawChart();
+  }
 }
 
 const chart = new ChartDrawer();

@@ -1,0 +1,36 @@
+<!-- dashboard.html -->
+<div id="dashboard" class="tab">
+  <header>
+    <div class="left-header">
+      <button id="chartBtn">Thống kê</button>
+    </div>
+    <div class="right-header">
+      <button>admin</button>
+      <button id="logoutBtn">Đăng xuất</button>
+      <span class="icon">🔔</span>
+    </div>
+  </header>
+  <div class="container">
+    <div class="column">
+      <h2>Trạng thái hiện tại</h2>
+      <div class="status-grid">
+        <div class="status-box" id="tempBox">🌡️ Nhiệt độ:<br />--&deg; C</div>
+        <div class="status-box" id="humiBox">💧 Độ ẩm:<br />--%</div>
+        <div class="status-box" id="lightBox">💡 Ánh sáng:<br />--lx</div>
+        <div class="status-box" id="statusBox">👤 Trạng thái:<br />--</div>
+      </div>
+    </div>
+    <div class="column">
+      <h2>Điều khiển ⚙️</h2>
+      <div class="control-box">
+        <div>🌀 Quạt</div>
+        <div class="toggle-switch on"></div>
+      </div>
+      <div class="control-box">
+        <div>💡 Đèn</div>
+        <div class="toggle-switch"></div>
+      </div>
+      <div class="auto-toggle">Tự động bật/tắt ✅</div>
+    </div>
+  </div>
+</div>

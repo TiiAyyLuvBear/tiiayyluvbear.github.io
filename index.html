@@ -2,9 +2,11 @@
 <html lang="vi">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard IoT</title>
+
+  <!-- Thư viện ngoài -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -159,9 +161,12 @@
       height: 300px;
     }
   </style>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
+  <!-- Nội dung sẽ được load vào đây -->
+  <div id="content"></div>
 
   <!-- Tab Đăng Nhập -->
   <div id="loginTab" class="tab">
@@ -221,31 +226,12 @@
   </div>
 
   <!-- JavaScript OOP -->
+  <!-- JavaScript load các file HTML con -->
   <script>
-    class App {
-      constructor() {
-        this.loginManager = new LoginManager(this);
-        this.mqttManager = new MQTTManager();
-        this.chartManager = new ChartManager();
-      }
-
-      init() {
-        this.showTab("loginTab");
-        this.loginManager.setup();
-        this.mqttManager.connect();
-
-        document.getElementById("chartBtn").onclick = () => this.showTab("chartTab");
-        document.getElementById("backBtn").onclick = () => this.showTab("dataTab");
-        document.getElementById("logoutBtn").onclick = () => this.showTab("loginTab");
-      }
-
-      showTab(tabId) {
-        document.querySelectorAll('.tab').forEach(tab => tab.style.display = 'none');
-        document.getElementById(tabId).style.display = 'block';
-        if (tabId === 'chartTab') {
-          this.chartManager.loadChart();
-        }
-      }
+    async function loadHTML(file) {
+      const res = await fetch(file);
+      const html = await res.text();
+      document.getElementById('content').insertAdjacentHTML('beforeend', html);
     }
 
     class LoginManager {
@@ -335,7 +321,15 @@
       const app = new App();
       app.init();
     };
+
+    // Nạp lần lượt các phần
+    loadHTML('tabs/login.html');
+    loadHTML('tabs/dashboard.html');
+    loadHTML('tabs/chart.html');
   </script>
+
+  <!-- JavaScript chính -->
+  <script type="module" src="js/app.js"></script>
 </body>
 
 </html>

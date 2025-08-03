@@ -2,38 +2,44 @@
 #include <PubSubClient.h>
 #include <LiquidCrystal_I2C.h>
 
-const char* ssid = "Wokwi-GUEST";
-const char* password = "";
+const char *ssid = "Wokwi-GUEST";
+const char *password = "";
 
 // MQTT Server
-const char* mqttServer = "broker.hivemq.com"; 
+const char *mqttServer = "broker.hivemq.com";
 int port = 1883;
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
-LiquidCrystal_I2C lcd(0x27, 16, 2);  // <- Sửa tên đúng
+LiquidCrystal_I2C lcd(0x27, 16, 2); // <- Sửa tên đúng
 
-void wifiConnect() {
+void wifiConnect()
+{
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
   Serial.println(" Connected!");
 }
 
-void mqttConnect() {
-  while (!mqttClient.connected()) {
+void mqttConnect()
+{
+  while (!mqttClient.connected())
+  {
     Serial.println("Attempting MQTT connection...");
     String clientId = "ESP32Client-" + String(random(0xffff), HEX);
-    if (mqttClient.connect(clientId.c_str())) {
+    if (mqttClient.connect(clientId.c_str()))
+    {
       Serial.println("Connected to MQTT");
 
       // Subscribe
       mqttClient.subscribe("23127263/esp32/humidity");
       mqttClient.subscribe("23127263/esp32/temperature");
-
-    } else {
+    }
+    else
+    {
       Serial.print("Failed, rc=");
       Serial.print(mqttClient.state());
       Serial.println(". Try again in 5 seconds.");
@@ -42,19 +48,22 @@ void mqttConnect() {
   }
 }
 
-void callback(char* topic, byte* message, unsigned int length) {
+void callback(char *topic, byte *message, unsigned int length)
+{
   // Serial.print("Message arrived [");
   // Serial.print(topic);
   // Serial.print("]: ");
   String msg;
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++)
+  {
     msg += (char)message[i];
   }
-  //Serial.println(msg);
-  // Có thể xử lý thêm ở đây
+  // Serial.println(msg);
+  //  Có thể xử lý thêm ở đây
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   Serial.print("Connecting to WiFi");
   wifiConnect();
@@ -70,13 +79,16 @@ void setup() {
   lcd.clear();
 }
 
-void loop() {
-  if (WiFi.status() != WL_CONNECTED) {
+void loop()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
     Serial.println("WiFi disconnected! Reconnecting...");
     wifiConnect();
   }
 
-  if (!mqttClient.connected()) {
+  if (!mqttClient.connected())
+  {
     mqttConnect();
   }
 
@@ -101,5 +113,5 @@ void loop() {
   sprintf(buffer, "%d", humidity);
   mqttClient.publish("23127263/esp32/humidity", buffer);
 
-  delay(3000);  // Chờ 5 giây
+  delay(3000); // Chờ 5 giây
 }

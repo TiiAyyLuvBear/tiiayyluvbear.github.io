@@ -1,15 +1,39 @@
+import { Auth } from './auth.js';
+import { MqttHandler } from './dashboard.js';
+
+const auth = new Auth();
+const mqttHandler = new MqttHandler();
+
 class App {
   constructor() {
-    this.currentTab = 'login';
-    this.showTab(this.currentTab);
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        this.showTab('dashboard');
+        mqttHandler.connect();
+        mqttHandler.init(() => this.handleLogout());
+      } else {
+        this.showTab('login');
+      }
+    });
+
+    auth.init(() => {
+      this.showTab('dashboard');
+      mqttHandler.connect();
+      mqttHandler.init(() => this.handleLogout());
+    });
   }
 
   showTab(tabId) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
+    const target = document.getElementById(tabId);
+    if (target) target.classList.add('active');
+  }
 
-    if (tabId === 'dashboard') mqttHandler.connect();
-    if (tabId === 'chart') chart.drawChart();
+  handleLogout() {
+    auth.logout(() => {
+      this.showTab('login');
+    });
   }
 }
 

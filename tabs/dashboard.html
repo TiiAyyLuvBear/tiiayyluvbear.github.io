@@ -27,21 +27,33 @@
       </div> -->
       <div class="control-box">
         <div>🌀 Quạt</div>
-        <div class="toggle-switch on" id="fanSwitch"></div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="fanSwitch">
+          <span class="slider"></span>
+        </label>
+        <!-- <div class="toggle-switch on" id="fanSwitch"></div> -->
         <div class="control-actions">
          <button class="control-btn fanOpenThresholdBtn">⚙️</button>
         </div>
       </div>
       <div class="control-box">
         <div>💡 Đèn</div>
-        <div class="toggle-switch" id="lightSwitch"></div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="lightSwitch">
+          <span class="slider"></span>
+        </label>        
+        <!-- <div class="toggle-switch" id="lightSwitch"></div> -->
         <div class="control-actions">
           <button class="control-btn lightOpenThresholdBtn">⚙️</button>
         </div>
       </div>
-      <div id="autoControlBtn" class="auto-toggle">
-        <div> Tự động bật/ tắt</div>
-        <button class="auto-control-toggle"> </button>
+
+      <div class="auto-control">
+        <div> Tự động bật tắt</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoBtn">
+          <span class="slider"></span>
+        </label>
       </div>
     </div>
   </div>

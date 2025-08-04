@@ -126,13 +126,11 @@ export class MqttHandler {
   }
 
   autoControl() {
-    const autoController = document.getElementById("autoControlBtn");
+    const autoSwitch = document.getElementById("autoBtn");
 
-    autoController.addEventListener("click", (event) => {
-      event.preventDefault();
-      this.autoMode = !this.autoMode;
-      autoController.classList.toggle("active");
-      autoController.innerText = this.autoMode ? `Bat` : `Tat`;
+    autoSwitch?.addEventListener("change", () => {
+      this.autoMode = autoSwitch.checked;
+      console.log("Tự động:", this.autoMode);
     });
 
   }
@@ -156,22 +154,6 @@ export class MqttHandler {
     });
   }
 
-  autoControl() {
-
-    const upperLight = 500;
-    const lowerLight = 200;
-
-    const upperTemperature = 35;
-    const lowerTemperature = 20;
-
-    const autoControl = document.getElementById("autoControlBtn");
-
-    autoControl.addEventListener("click", (event) => {
-      event.preventDefault()
-
-
-    })
-  }
 
   fanControlSetting(){
 

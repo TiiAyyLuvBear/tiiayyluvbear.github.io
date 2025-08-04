@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấu hình Thông báo - IoT Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .settings-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .settings-section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.8;
+        }
+        
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .range-input {
+            width: 100%;
+        }
+        
+        .range-value {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <h1>⚙️ Cấu hình Thông báo Push</h1>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <!-- Pushsafer API Configuration -->
+        <div class="settings-section">
+            <h3>🔑 Cấu hình Pushsafer API</h3>
+            <div class="form-group">
+                <label for="pushsaferKey">Private Key:</label>
+                <input type="password" id="pushsaferKey" placeholder="Nhập Private Key từ Pushsafer">
+                <small>Lấy Private Key từ <a href="https://www.pushsafer.com" target="_blank">pushsafer.com</a></small>
+            </div>
+            <button class="btn btn-primary" onclick="savePushsaferKey()">💾 Lưu Key</button>
+            <button class="btn btn-secondary" onclick="testNotification()">🔔 Test Notification</button>
+        </div>
+        
+        <!-- Notification Toggle -->
+        <div class="settings-section">
+            <h3>🔔 Bật/Tắt Thông báo</h3>
+            <div class="form-group">
+                <label>
+                    Thông báo nhiệt độ:
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="tempNotification">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    Thông báo ánh sáng:
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="lightNotification">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    Thông báo chuyển động:
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="motionNotification">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Threshold Settings -->
+        <div class="settings-section">
+            <h3>⚠️ Ngưỡng Cảnh báo</h3>
+            <div class="form-group">
+                <label for="tempHigh">Nhiệt độ cao (°C): <span class="range-value" id="tempHighValue">35</span></label>
+                <input type="range" id="tempHigh" class="range-input" min="25" max="50" value="35">
+            </div>
+            <div class="form-group">
+                <label for="tempLow">Nhiệt độ thấp (°C): <span class="range-value" id="tempLowValue">10</span></label>
+                <input type="range" id="tempLow" class="range-input" min="0" max="20" value="10">
+            </div>
+            <div class="form-group">
+                <label for="lightLow">Ánh sáng thấp (%): <span class="range-value" id="lightLowValue">20</span></label>
+                <input type="range" id="lightLow" class="range-input" min="0" max="50" value="20">
+            </div>
+            <button class="btn btn-primary" onclick="saveThresholds()">💾 Lưu Ngưỡng</button>
+        </div>
+        
+        <!-- Sound Settings -->
+        <div class="settings-section">
+            <h3>🔊 Cài đặt Âm thanh</h3>
+            <div class="form-group">
+                <label for="tempSound">Âm thanh nhiệt độ:</label>
+                <select id="tempSound">
+                    <option value="1">Default</option>
+                    <option value="8">Notification</option>
+                    <option value="11" selected>Alarm</option>
+                    <option value="15">Alert</option>
+                    <option value="22">Emergency</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="lightSound">Âm thanh ánh sáng:</label>
+                <select id="lightSound">
+                    <option value="1">Default</option>
+                    <option value="8" selected>Notification</option>
+                    <option value="11">Alarm</option>
+                    <option value="15">Alert</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="motionSound">Âm thanh chuyển động:</label>
+                <select id="motionSound">
+                    <option value="1">Default</option>
+                    <option value="8">Notification</option>
+                    <option value="11">Alarm</option>
+                    <option value="15" selected>Alert</option>
+                    <option value="22">Emergency</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="saveSoundSettings()">💾 Lưu Âm thanh</button>
+        </div>
+        
+        <!-- Import/Export Settings -->
+        <div class="settings-section">
+            <h3>📁 Sao lưu & Khôi phục</h3>
+            <button class="btn btn-secondary" onclick="exportSettings()">📤 Xuất cấu hình</button>
+            <button class="btn btn-secondary" onclick="importSettings()">📥 Nhập cấu hình</button>
+            <button class="btn btn-danger" onclick="resetSettings()">🔄 Đặt lại mặc định</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImportFile(event)">
+        </div>
+        
+        <div class="form-group">
+            <button class="btn btn-secondary" onclick="goBack()">⬅️ Quay lại Dashboard</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { NotificationConfig } from '../js/notification-config.js';
+        import { PushsaferNotifier } from '../js/pushsafer.js';
+        
+        let notificationConfig;
+        let pushNotifier;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            notificationConfig = new NotificationConfig();
+            pushNotifier = new PushsaferNotifier();
+            loadSettings();
+            setupEventListeners();
+        });
+        
+        function loadSettings() {
+            // Load Pushsafer key
+            document.getElementById('pushsaferKey').value = notificationConfig.getPushsaferKey();
+            
+            // Load notification toggles
+            document.getElementById('tempNotification').checked = notificationConfig.isNotificationEnabled('temperature');
+            document.getElementById('lightNotification').checked = notificationConfig.isNotificationEnabled('light');
+            document.getElementById('motionNotification').checked = notificationConfig.isNotificationEnabled('motion');
+            
+            // Load thresholds
+            const thresholds = notificationConfig.getThresholds();
+            document.getElementById('tempHigh').value = thresholds.temperature.high;
+            document.getElementById('tempHighValue').textContent = thresholds.temperature.high;
+            document.getElementById('tempLow').value = thresholds.temperature.low;
+            document.getElementById('tempLowValue').textContent = thresholds.temperature.low;
+            document.getElementById('lightLow').value = thresholds.light.low;
+            document.getElementById('lightLowValue').textContent = thresholds.light.low;
+            
+            // Load sound settings
+            document.getElementById('tempSound').value = notificationConfig.getSound('temperature');
+            document.getElementById('lightSound').value = notificationConfig.getSound('light');
+            document.getElementById('motionSound').value = notificationConfig.getSound('motion');
+        }
+        
+        function setupEventListeners() {
+            // Range inputs
+            document.getElementById('tempHigh').addEventListener('input', function() {
+                document.getElementById('tempHighValue').textContent = this.value;
+            });
+            
+            document.getElementById('tempLow').addEventListener('input', function() {
+                document.getElementById('tempLowValue').textContent = this.value;
+            });
+            
+            document.getElementById('lightLow').addEventListener('input', function() {
+                document.getElementById('lightLowValue').textContent = this.value;
+            });
+            
+            // Notification toggles
+            document.getElementById('tempNotification').addEventListener('change', function() {
+                notificationConfig.toggleNotification('temperature', this.checked);
+                showMessage('Đã cập nhật cài đặt thông báo nhiệt độ', 'success');
+            });
+            
+            document.getElementById('lightNotification').addEventListener('change', function() {
+                notificationConfig.toggleNotification('light', this.checked);
+                showMessage('Đã cập nhật cài đặt thông báo ánh sáng', 'success');
+            });
+            
+            document.getElementById('motionNotification').addEventListener('change', function() {
+                notificationConfig.toggleNotification('motion', this.checked);
+                showMessage('Đã cập nhật cài đặt thông báo chuyển động', 'success');
+            });
+        }
+        
+        window.savePushsaferKey = function() {
+            const key = document.getElementById('pushsaferKey').value.trim();
+            if (!key) {
+                showMessage('Vui lòng nhập Private Key', 'error');
+                return;
+            }
+            
+            notificationConfig.setPushsaferKey(key);
+            pushNotifier.setPushsaferKey(key);
+            showMessage('Đã lưu Pushsafer Private Key', 'success');
+        };
+        
+        window.testNotification = async function() {
+            const key = document.getElementById('pushsaferKey').value.trim();
+            if (!key) {
+                showMessage('Vui lòng nhập Private Key trước khi test', 'error');
+                return;
+            }
+            
+            showMessage('Đang gửi test notification...', 'success');
+            const success = await pushNotifier.testNotification();
+            
+            if (success) {
+                showMessage('✅ Test notification đã được gửi thành công!', 'success');
+            } else {
+                showMessage('❌ Gửi test notification thất bại. Kiểm tra lại Private Key.', 'error');
+            }
+        };
+        
+        window.saveThresholds = function() {
+            const thresholds = {
+                temperature: {
+                    high: parseInt(document.getElementById('tempHigh').value),
+                    low: parseInt(document.getElementById('tempLow').value)
+                },
+                light: {
+                    low: parseInt(document.getElementById('lightLow').value)
+                }
+            };
+            
+            notificationConfig.updateThresholds(thresholds);
+            pushNotifier.updateThresholds(thresholds);
+            showMessage('Đã lưu ngưỡng cảnh báo', 'success');
+        };
+        
+        window.saveSoundSettings = function() {
+            const sounds = {
+                temperature: parseInt(document.getElementById('tempSound').value),
+                light: parseInt(document.getElementById('lightSound').value),
+                motion: parseInt(document.getElementById('motionSound').value)
+            };
+            
+            notificationConfig.set('sounds', sounds);
+            showMessage('Đã lưu cài đặt âm thanh', 'success');
+        };
+        
+        window.exportSettings = function() {
+            const config = notificationConfig.exportConfig();
+            const blob = new Blob([config], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'iot-notification-config.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showMessage('Đã xuất cấu hình', 'success');
+        };
+        
+        window.importSettings = function() {
+            document.getElementById('importFile').click();
+        };
+        
+        window.handleImportFile = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const success = notificationConfig.importConfig(e.target.result);
+                    if (success) {
+                        loadSettings();
+                        showMessage('Đã nhập cấu hình thành công', 'success');
+                    } else {
+                        showMessage('Lỗi nhập cấu hình', 'error');
+                    }
+                } catch (error) {
+                    showMessage('File cấu hình không hợp lệ', 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        window.resetSettings = function() {
+            if (confirm('Bạn có chắc muốn đặt lại tất cả cài đặt về mặc định?')) {
+                notificationConfig.resetToDefaults();
+                loadSettings();
+                showMessage('Đã đặt lại cài đặt mặc định', 'success');
+            }
+        };
+        
+        window.goBack = function() {
+            window.location.href = 'dashboard.html';
+        };
+        
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('statusMessage');
+            messageEl.textContent = message;
+            messageEl.className = `status-message status-${type}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

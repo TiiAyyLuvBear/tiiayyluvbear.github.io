@@ -41,7 +41,7 @@ export class MqttHandler {
     this.client.on("message", (topic, message) => {
       const value = message.toString();
       const key = topic.split("/").pop();  // "temperature", "humidity", ...
-
+      //console.log(key);
       // Hiển thị và xử lý như trước
       if (key === "temperature") {
         const temp = parseFloat(value);
@@ -78,29 +78,28 @@ export class MqttHandler {
         this.cache.motion = motionDetected ? 1 : 0;
       }
 
-      // Gửi Firebase nếu đủ dữ liệu
-      // if (this.cache.temperature !== undefined &&
-      //   this.cache.humidity !== undefined &&
-      //   this.cache.light !== undefined &&
-      //   this.cache.motion !== undefined) {
+      //Gửi Firebase nếu đủ dữ liệu
+      if (this.cache.temperature !== undefined &&
+        this.cache.humidity !== undefined &&
+        this.cache.light !== undefined &&
+        this.cache.motion !== undefined) {
 
-      //   const now = new Date();
-      //   const pad = (n) => n.toString().padStart(2, '0');
-      //   const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-      //   const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-      //   const fullTime = `${dateStr} ${timeStr}`;
+        const now = new Date();
+        const pad = (n) => n.toString().padStart(2, '0');
+        const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const fullTime = `${dateStr} ${timeStr}`;
 
-      //   const payload = {
-      //     name: "phonghoc",
-      //     temperature: this.cache.temperature,
-      //     humidity: this.cache.humidity,
-      //     light: this.cache.light,
-      //     motion: this.cache.motion,
-      //     time: fullTime
-      //   };
+        const payload = {
+          name: "phonghoc",
+          temperature: this.cache.temperature,
+          humidity: this.cache.humidity,
+          light: this.cache.light,
+          motion: this.cache.motion,
+          time: fullTime
+        };
 
         // Ghi duy nhất vào nhánh /sensor/yyyy-mm-dd/
-        const logRef = ref(db, `sensor/${dateStr}`);
         push(logRef, payload)
           .then(() => {
             console.log("✅ Dữ liệu đã được lưu vào Firebase:", payload);
@@ -109,9 +108,9 @@ export class MqttHandler {
             console.error("❌ Lỗi khi lưu dữ liệu vào Firebase:", error);
           });
 
-      //   // Reset lại cache
-      //   this.cache = {};
-      // }
+        // Reset lại cache
+        this.cache = {};
+      }
     });
 
 

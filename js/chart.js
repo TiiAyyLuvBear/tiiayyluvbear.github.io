@@ -1,3 +1,4 @@
+
 export class ChartDrawer {
   constructor() {
     // Cấu hình Firebase

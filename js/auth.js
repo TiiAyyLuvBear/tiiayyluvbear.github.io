@@ -71,7 +71,7 @@ export class Auth {
         .then(() => {
           alert("Đăng ký thành công!");
           document.getElementById("signup").classList.remove("active");
-          document.getElementById("login").classList.add("active");
+          //document.getElementById("login").classList.add("active");
         })
         .catch((error) => alert("Lỗi: " + error.message));
     });

@@ -8,7 +8,7 @@ body {
 }
 
 .tab {
-  display: none;
+  display: none
 }
 
 .tab.active {
@@ -277,6 +277,18 @@ canvas {
 
 .popup button:hover {
   background-color: #5e93b0;
+}
+
+#thresholdOverlay.active ~ #dashboard {
+  filter: blur(30px);
+  pointer-events: none;
+  user-select: none;
+}
+
+#dashboard.blurred {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
 }
 
 

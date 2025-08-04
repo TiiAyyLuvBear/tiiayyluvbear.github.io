@@ -73,6 +73,7 @@ export class MqttHandler {
     this.logout(callbackOnLogout);
 
     const overlay = document.getElementById("thresholdOverlay");
+    const dashboard = document.getElementById("dashboard");
     const fanInput = document.getElementById("fanThreshold");
     const fanValue = document.getElementById("fanValue");
     const lightInput = document.getElementById("lightThreshold");
@@ -83,11 +84,13 @@ export class MqttHandler {
     controlBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         overlay.classList.add("active");
+        dashboard?.classList.add("blurred"); 
       });
     });
 
     closePopupBtn?.addEventListener("click", () => {
       overlay.classList.remove("active");
+      dashboard?.classList.remove("blurred"); 
     });
 
     fanInput?.addEventListener("input", () => {
@@ -157,4 +160,5 @@ export class MqttHandler {
       container.appendChild(settingsLink);
     }
   }
+
 }

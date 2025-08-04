@@ -1,12 +1,13 @@
 import { Auth } from './auth.js';
 import { MqttHandler } from './dashboard.js';
+import { ChartDrawer } from './chart.js';
 
 const auth = new Auth();
 const mqttHandler = new MqttHandler();
+const chart = new ChartDrawer();
 
 class App {
   constructor() {
-
     auth.onAuthStateChanged((user) => {
       if (user) {
         this.showTab('dashboard');
@@ -22,6 +23,29 @@ class App {
       mqttHandler.connect();
       mqttHandler.init(() => this.handleLogout());
     });
+
+    const btnStatistics = document.getElementById('chartBtn');
+    if (btnStatistics) {
+      btnStatistics.addEventListener('click', () => {
+        this.showTab('chart');
+        chart.init();  // Vẽ biểu đồ
+      });
+    }
+
+    const btnDashboard = document.getElementById('dashBoardBtn');
+    if (btnDashboard){
+      btnDashboard.addEventListener('click', () => {
+        this.showTab('dashboard');
+      })
+    }
+
+    const btnBack = document.getElementById('backBtn');
+    if (btnBack){
+      btnBack.addEventListener('click', () => {
+        this.showTab('dashboard');
+      })
+    }
+    
   }
 
   showTab(tabId) {
@@ -38,3 +62,4 @@ class App {
 }
 
 const app = new App();
+

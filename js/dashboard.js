@@ -2,11 +2,17 @@ import { auth } from './auth.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { PushsaferNotifier } from './pushsafer.js';
 
+
 export class MqttHandler {
   constructor() {
     this.client = null;
-    // PushsaferNotifier sẽ tự động load private key từ config
     this.pushNotifier = new PushsaferNotifier();
+    this.temperature = 0;
+    this.humidity = 0;
+    this.light = 0;
+    this.motion = null;
+
+    this.autoMode = false;
   }
 
   connect() {
@@ -48,6 +54,35 @@ export class MqttHandler {
         }
       }
     });
+
+    this.autoControl();
+    if(this.autoMode){
+      if (this.temperature >= this.upperTemperature) {
+        this.client.publish("23127263/esp32/fan", "on");
+      } else if (this.temperature <= this.lowerTemperature) {
+        this.client.publish("23127263/esp32/fan", "off");
+      }
+
+      // Kiểm tra ánh sáng để điều khiển đèn
+      if (this.light <= this.lowerLight) {
+        this.client.publish("23127263/esp32/light", "on");
+      } else if (this.light >= this.upperLight) {
+        this.client.publish("23127263/esp32/light", "off");
+      }
+    }
+    
+  }
+
+  autoControl(){
+    const autoController = document.getElementById("autoControlBtn");
+
+    autoController.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.autoMode = !this.autoMode;
+      autoController.classList.toggle("active");
+      autoController.innerText = this.autoMode ? `Bat` : `Tat`;
+    });
+
   }
 
   logout(callbackOnSuccess) {
@@ -69,8 +104,24 @@ export class MqttHandler {
     });
   }
 
-  init(callbackOnLogout) {
-    this.logout(callbackOnLogout);
+  autoControl(){
+
+    const upperLight = 500;
+    const lowerLight = 200;
+
+    const upperTemperature = 35;
+    const lowerTemperature = 20;
+
+    const autoControl = document.getElementById("autoControlBtn");
+
+    autoControl.addEventListener("click", (event)=> {
+      event.preventDefault()
+
+      
+    })
+  }
+
+  controlSetting(){
 
     const overlay = document.getElementById("thresholdOverlay");
     const dashboard = document.getElementById("dashboard");
@@ -108,57 +159,63 @@ export class MqttHandler {
         light: { low: parseInt(lightInput.value) }
       });
     });
+  }
+  init(callbackOnLogout) {
+    this.logout(callbackOnLogout);
+    this.controlSetting();
 
-    // Add test notification button and settings link
-    this.addTestNotificationButton();
-    this.addSettingsLink();
+
+
+  //   // Add test notification button and settings link
+  //   this.addTestNotificationButton();
+  //   this.addSettingsLink();
   }
 
-  addTestNotificationButton() {
-    // Tạo nút test notification nếu chưa có
-    if (!document.getElementById("testNotificationBtn")) {
-      const testBtn = document.createElement("button");
-      testBtn.id = "testNotificationBtn";
-      testBtn.className = "control-btn";
-      testBtn.innerHTML = "🔔 Test Notification";
-      testBtn.style.marginTop = "10px";
+  // addTestNotificationButton() {
+  //   // Tạo nút test notification nếu chưa có
+  //   if (!document.getElementById("testNotificationBtn")) {
+  //     const testBtn = document.createElement("button");
+  //     testBtn.id = "testNotificationBtn";
+  //     testBtn.className = "control-btn";
+  //     testBtn.innerHTML = "🔔 Test Notification";
+  //     testBtn.style.marginTop = "10px";
       
-      testBtn.addEventListener("click", async () => {
-        testBtn.disabled = true;
-        testBtn.innerHTML = "⏳ Đang gửi...";
+  //     testBtn.addEventListener("click", async () => {
+  //       testBtn.disabled = true;
+  //       testBtn.innerHTML = "⏳ Đang gửi...";
         
-        const success = await this.pushNotifier.testNotification();
+  //       const success = await this.pushNotifier.testNotification();
         
-        testBtn.disabled = false;
-        testBtn.innerHTML = success ? "✅ Đã gửi!" : "❌ Lỗi";
+  //       testBtn.disabled = false;
+  //       testBtn.innerHTML = success ? "✅ Đã gửi!" : "❌ Lỗi";
         
-        setTimeout(() => {
-          testBtn.innerHTML = "🔔 Test Notification";
-        }, 2000);
-      });
+  //       setTimeout(() => {
+  //         testBtn.innerHTML = "🔔 Test Notification";
+  //       }, 2000);
+  //     });
 
-      // Thêm vào container thích hợp
-      const container = document.querySelector(".dashboard-container") || document.body;
-      container.appendChild(testBtn);
-    }
-  }
+  //     // Thêm vào container thích hợp
+  //     const container = document.querySelector(".dashboard-container") || document.body;
+  //     container.appendChild(testBtn);
+  //   }
+  // }
 
-  addSettingsLink() {
-    // Tạo link đến trang settings nếu chưa có
-    if (!document.getElementById("notificationSettingsLink")) {
-      const settingsLink = document.createElement("a");
-      settingsLink.id = "notificationSettingsLink";
-      settingsLink.className = "control-btn";
-      settingsLink.innerHTML = "⚙️ Cài đặt Thông báo";
-      settingsLink.href = "notification-settings.html";
-      settingsLink.style.marginTop = "10px";
-      settingsLink.style.textDecoration = "none";
-      settingsLink.style.display = "inline-block";
+  // addSettingsLink() {
+  //   // Tạo link đến trang settings nếu chưa có
+  //   if (!document.getElementById("notificationSettingsLink")) {
+  //     const settingsLink = document.createElement("a");
+  //     settingsLink.id = "notificationSettingsLink";
+  //     settingsLink.className = "control-btn";
+  //     settingsLink.innerHTML = "⚙️ Cài đặt Thông báo";
+  //     settingsLink.href = "notification-settings.html";
+  //     settingsLink.style.marginTop = "10px";
+  //     settingsLink.style.textDecoration = "none";
+  //     settingsLink.style.display = "inline-block";
 
-      // Thêm vào container thích hợp
-      const container = document.querySelector(".dashboard-container") || document.body;
-      container.appendChild(settingsLink);
-    }
-  }
+  //     // Thêm vào container thích hợp
+  //     const container = document.querySelector(".dashboard-container") || document.body;
+  //     container.appendChild(settingsLink);
+  //   }
+  // }
 
 }

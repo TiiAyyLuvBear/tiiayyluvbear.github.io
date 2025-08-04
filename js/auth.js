@@ -13,7 +13,8 @@ const firebaseConfig = {
   projectId: "login-5637d",
   storageBucket: "login-5637d.firebasestorage.app",
   messagingSenderId: "640016475258",
-  appId: "1:640016475258:web:d6ad2609d1aa128e4d87c3"
+  appId: "1:640016475258:web:d6ad2609d1aa128e4d87c3",
+  databaseURL: "https://login-5637d-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 const app = initializeApp(firebaseConfig);

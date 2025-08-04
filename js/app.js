@@ -29,23 +29,27 @@ class App {
       btnStatistics.addEventListener('click', () => {
         this.showTab('chart');
         chart.init();  // Vẽ biểu đồ
+        // Log navigation event
+        mqttHandler.logUserActivity?.("navigation", "Xem trang thống kê");
       });
     }
 
     const btnDashboard = document.getElementById('dashBoardBtn');
-    if (btnDashboard){
+    if (btnDashboard) {
       btnDashboard.addEventListener('click', () => {
         this.showTab('dashboard');
+        mqttHandler.logUserActivity?.("navigation", "Quay về trang chính");
       })
     }
 
     const btnBack = document.getElementById('backBtn');
-    if (btnBack){
+    if (btnBack) {
       btnBack.addEventListener('click', () => {
         this.showTab('dashboard');
+        mqttHandler.logUserActivity?.("navigation", "Quay về dashboard");
       })
     }
-    
+
   }
 
   showTab(tabId) {

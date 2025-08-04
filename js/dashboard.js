@@ -47,27 +47,27 @@ export class MqttHandler {
         const temp = parseFloat(value);
         this.temperature = temp;
         document.getElementById("tempBox").innerHTML = `🌡️ Nhiệt độ: ${value} °C`;
-        this.pushNotifier.checkAndNotifyTemperature(temp);
-        this.cache.temperature = temp;
+        // this.pushNotifier.checkAndNotifyTemperature(temp);
+        //this.cache.temperature = temp;
       }
 
       if (key === "humidity") {
         this.humidity = parseFloat(value);
         document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${value} %`;
-        this.cache.humidity = parseInt(value);
+        //this.cache.humidity = parseInt(value);
       }
 
       if (key === "light") {
         const light = parseInt(value);
         this.light = light;
         document.getElementById("lightBox").innerHTML = `Độ sáng: ${value} %`;
-        this.pushNotifier.checkAndNotifyLight(light);
-        this.cache.light = light;
+        //this.pushNotifier.checkAndNotifyLight(light);
+        //this.cache.light = light;
       }
 
       if (key === "motion") {
         const motionDetected = value === "1" || value.toLowerCase() === "detected";
-        // Sửa từ statusBox thành motionBox để match với HTML
+        this.motion = this.motion = value ? `Co nguoi`:  `Khong co nguoi`;
         const motionBox = document.getElementById("motionBox");
         if (motionBox) {
           motionBox.innerHTML = `👤 Trạng thái: ${motionDetected ? 'Có chuyển động' : 'Không có chuyển động'}`;
@@ -79,25 +79,25 @@ export class MqttHandler {
       }
 
       // Gửi Firebase nếu đủ dữ liệu
-      if (this.cache.temperature !== undefined &&
-        this.cache.humidity !== undefined &&
-        this.cache.light !== undefined &&
-        this.cache.motion !== undefined) {
+      // if (this.cache.temperature !== undefined &&
+      //   this.cache.humidity !== undefined &&
+      //   this.cache.light !== undefined &&
+      //   this.cache.motion !== undefined) {
 
-        const now = new Date();
-        const pad = (n) => n.toString().padStart(2, '0');
-        const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-        const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-        const fullTime = `${dateStr} ${timeStr}`;
+      //   const now = new Date();
+      //   const pad = (n) => n.toString().padStart(2, '0');
+      //   const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+      //   const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      //   const fullTime = `${dateStr} ${timeStr}`;
 
-        const payload = {
-          name: "phonghoc",
-          temperature: this.cache.temperature,
-          humidity: this.cache.humidity,
-          light: this.cache.light,
-          motion: this.cache.motion,
-          time: fullTime
-        };
+      //   const payload = {
+      //     name: "phonghoc",
+      //     temperature: this.cache.temperature,
+      //     humidity: this.cache.humidity,
+      //     light: this.cache.light,
+      //     motion: this.cache.motion,
+      //     time: fullTime
+      //   };
 
         // Ghi duy nhất vào nhánh /sensor/yyyy-mm-dd/
         const logRef = ref(db, `sensor/${dateStr}`);
@@ -109,9 +109,9 @@ export class MqttHandler {
             console.error("❌ Lỗi khi lưu dữ liệu vào Firebase:", error);
           });
 
-        // Reset lại cache
-        this.cache = {};
-      }
+      //   // Reset lại cache
+      //   this.cache = {};
+      // }
     });
 
 
@@ -119,15 +119,19 @@ export class MqttHandler {
     if (this.autoMode) {
       if (this.temperature >= this.upperTemperature) {
         this.client.publish("23127263/esp32/control/fan", "on");
+        document.getElementById("fanSwitch").add("active");
       } else if (this.temperature <= this.lowerTemperature) {
         this.client.publish("23127263/esp32/control/fan", "off");
+        document.getElementById("fanSwitch").remove("active");
       }
 
       // Kiểm tra ánh sáng để điều khiển đèn
-      if (this.light <= this.lowerLight) {
-        this.client.publish("23127263/esp32/control/light", "on");
-      } else if (this.light >= this.upperLight) {
-        this.client.publish("23127263/esp32/control/light", "off");
+      if (this.light <= this.lightOn) {
+      this.client.publish("23127263/esp32/lamp", "on");
+      document.getElementById("lightSwitch").add("active");
+      } else if (this.light >= this.lightOff) {
+        this.client.publish("23127263/esp32/lamp", "off");
+        document.getElementById("lightSwitch").remove("active");
       }
     }
 

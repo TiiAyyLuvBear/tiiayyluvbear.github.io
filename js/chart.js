@@ -14,7 +14,13 @@ export class ChartDrawer {
   async drawChart(startDate, endDate) {
     console.log(startDate);
     console.log(endDate);
-    const logRef = query(ref(this.db, `sensor/${this.startDate}`), limitToLast(20));
+
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    
+    const database = `sensor/${dateStr}`;
+    const logRef = query(ref(this.db, database), limitToLast(20));
 
     try {
       const snapshot = await get(logRef);

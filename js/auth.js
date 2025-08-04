@@ -17,7 +17,7 @@ const firebaseConfig = {
   databaseURL: "https://login-5637d-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 export class Auth {

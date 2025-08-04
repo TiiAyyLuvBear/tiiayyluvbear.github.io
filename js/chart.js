@@ -12,20 +12,20 @@ export class ChartDrawer {
 
 
   async drawChart(startDate, endDate) {
-    console.log(startDate);
-    console.log(endDate);
+    // console.log(startDate);
+    // console.log(endDate);
 
     const now = new Date();
     const pad = (n) => n.toString().padStart(2, '0');
     const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-    
-    const database = `sensor/${dateStr}`;
+    //console.log(dateStr);
+    const database = `sensor/${startDate}`;
     const logRef = query(ref(this.db, database), limitToLast(20));
 
     try {
       const snapshot = await get(logRef);
       if (!snapshot.exists()) {
-        console.warn(`Không có dữ liệu cho ngày ${today}`);
+        console.warn(`Không có dữ liệu cho ngày ${startDate}`);
         return;
       }
 

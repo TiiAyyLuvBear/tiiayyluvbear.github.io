@@ -127,10 +127,10 @@ export class MqttHandler {
 
       // Kiểm tra ánh sáng để điều khiển đèn
       if (this.light <= this.lightOn) {
-      this.client.publish("23127263/esp32/lamp", "on");
+      this.client.publish("23127263/esp32/control/lamp", "on");
       document.getElementById("lightSwitch").add("active");
       } else if (this.light >= this.lightOff) {
-        this.client.publish("23127263/esp32/lamp", "off");
+        this.client.publish("23127263/esp32/control/lamp", "off");
         document.getElementById("lightSwitch").remove("active");
       }
     }
@@ -138,28 +138,94 @@ export class MqttHandler {
   }
 
   autoControl() {
-    const upperLight = 500;
-    const lowerLight = 200;
-    const upperTemperature = 35;
-    const lowerTemperature = 20;
+    const autoSwitch = document.getElementById("autoBtn");
 
-    const autoControlBtn = document.getElementById("autoControlBtn");
-    if (!autoControlBtn) return;
+    autoSwitch?.addEventListener("change", () => {
+      this.autoMode = autoSwitch.checked;
+      console.log("Tự động:", this.autoMode);
+    });
+  }
+  fanControlSetting(){
 
-    autoControlBtn.addEventListener("click", (event) => {
-      event.preventDefault();
-      this.autoMode = !this.autoMode;
+    const overlay = document.getElementById("fanThresholdOverlay");
+    const dashboard = document.getElementById("dashboard");
+    const fanOn    = document.getElementById("fanOn");
+    const fanOnValue = document.getElementById("fanOnValue");
+    const fanOff = document.getElementById("fanOff");
+    const fanOffValue = document.getElementById("fanOffValue");
+    const closePopupBtn = document.getElementById("closePopup");
 
-      // Lưu threshold values
-      this.upperLight = upperLight;
-      this.lowerLight = lowerLight;
-      this.upperTemperature = upperTemperature;
-      this.lowerTemperature = lowerTemperature;
+    const controlBtns = document.querySelectorAll(".control-btn.fanOpenThresholdBtn");
+    controlBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        overlay.classList.add("active");
+        dashboard?.classList.add("blurred"); 
+      });
+    });
 
-      autoControlBtn.classList.toggle("active");
-      autoControlBtn.innerText = this.autoMode ? "Bật" : "Tắt";
+    closePopupBtn?.addEventListener("click", () => {
+      overlay.classList.remove("active");
+      dashboard?.classList.remove("blurred"); 
+    });
 
-      console.log("Auto Mode:", this.autoMode ? "ON" : "OFF");
+    fanOn?.addEventListener("input", () => {
+      fanOnValue.textContent = fanOn.value;
+      this.fanOn = parseFloat(fanOn.value);
+      // Update temperature threshold for notifications
+      this.pushNotifier.updateThresholds({
+        temperature: { high: parseInt(fanOn.value), low: 10 }
+      });
+    });
+
+    fanOff?.addEventListener("input", () => {
+      fanOffValue.textContent = fanOff.value;
+      this.fanOff = parseFloat(fanOff.value);
+      // Update light threshold for notifications
+      this.pushNotifier.updateThresholds({
+        light: { low: parseInt(fanOff.value) }
+      });
+    });
+  }
+
+    lightControlSetting(){
+
+    const overlay = document.getElementById("lightThresholdOverlay");
+    const dashboard = document.getElementById("dashboard");
+    const lightOn    = document.getElementById("lightOn");
+    const lightOnValue = document.getElementById("lightOnValue");
+    const lightOff = document.getElementById("lightOff");
+    const lightOffValue = document.getElementById("lightOffValue");
+    const closePopupBtn = document.getElementById("closePopup2");
+
+    const controlBtns = document.querySelectorAll(".control-btn.lightOpenThresholdBtn");
+    controlBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        overlay.classList.add("active");
+        dashboard?.classList.add("blurred"); 
+      });
+    });
+
+    closePopupBtn?.addEventListener("click", () => {
+      overlay.classList.remove("active");
+      dashboard?.classList.remove("blurred"); 
+    });
+
+    lightOn?.addEventListener("input", () => {
+      lightOnValue.textContent = lightOn.value;
+      this.lightOn = parseFloat(lightOn.value);
+      // Update temperature threshold for notifications
+      this.pushNotifier.updateThresholds({
+        temperature: { high: parseInt(fanOn.value), low: 10 }
+      });
+    });
+
+    lightOff?.addEventListener("input", () => {
+      lightOffValue.textContent = lightOff.value;
+      this.lightOff = parseFloat(lightOff.value);
+      // Update light threshold for notifications
+      this.pushNotifier.updateThresholds({
+        light: { low: parseInt(fanOff.value) }
+      });
     });
   }
 
@@ -219,47 +285,47 @@ export class MqttHandler {
     });
   }
 
-  controlSetting() {
+  // controlSetting() {
 
-    const overlay = document.getElementById("thresholdOverlay");
-    const dashboard = document.getElementById("dashboard");
-    const fanInput = document.getElementById("fanThreshold");
-    const fanValue = document.getElementById("fanValue");
-    const lightInput = document.getElementById("lightThreshold");
-    const lightValue = document.getElementById("lightValue");
-    const closePopupBtn = document.getElementById("closePopup");
+  //   const overlay = document.getElementById("thresholdOverlay");
+  //   const dashboard = document.getElementById("dashboard");
+  //   const fanInput = document.getElementById("fanThreshold");
+  //   const fanValue = document.getElementById("fanValue");
+  //   const lightInput = document.getElementById("lightThreshold");
+  //   const lightValue = document.getElementById("lightValue");
+  //   const closePopupBtn = document.getElementById("closePopup");
 
-    const controlBtns = document.querySelectorAll(".control-btn.openThresholdBtn");
-    controlBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        overlay.classList.add("active");
-        dashboard?.classList.add("blurred");
-      });
-    });
+  //   const controlBtns = document.querySelectorAll(".control-btn.openThresholdBtn");
+  //   controlBtns.forEach(btn => {
+  //     btn.addEventListener("click", () => {
+  //       overlay.classList.add("active");
+  //       dashboard?.classList.add("blurred");
+  //     });
+  //   });
 
-    closePopupBtn?.addEventListener("click", () => {
-      overlay.classList.remove("active");
-      dashboard?.classList.remove("blurred");
-    });
+  //   closePopupBtn?.addEventListener("click", () => {
+  //     overlay.classList.remove("active");
+  //     dashboard?.classList.remove("blurred");
+  //   });
 
-    lightOn?.addEventListener("input", () => {
-      lightOnValue.textContent = lightOn.value;
-      this.lightOn = parseFloat(lightOn.value);
-      // Update temperature threshold for notifications
-      this.pushNotifier.updateThresholds({
-        temperature: { high: parseInt(fanOn.value), low: 10 }
-      });
-    });
+  //   lightOn?.addEventListener("input", () => {
+  //     lightOnValue.textContent = lightOn.value;
+  //     this.lightOn = parseFloat(lightOn.value);
+  //     // Update temperature threshold for notifications
+  //     this.pushNotifier.updateThresholds({
+  //       temperature: { high: parseInt(fanOn.value), low: 10 }
+  //     });
+  //   });
 
-    lightOff?.addEventListener("input", () => {
-      lightOffValue.textContent = lightOff.value;
-      this.lightOff = parseFloat(lightOff.value);
-      // Update light threshold for notifications
-      this.pushNotifier.updateThresholds({
-        light: { low: parseInt(fanOff.value) }
-      });
-    });
-  }
+  //   lightOff?.addEventListener("input", () => {
+  //     lightOffValue.textContent = lightOff.value;
+  //     this.lightOff = parseFloat(lightOff.value);
+  //     // Update light threshold for notifications
+  //     this.pushNotifier.updateThresholds({
+  //       light: { low: parseInt(fanOff.value) }
+  //     });
+  //   });
+  // }
 
   saveThresholdsToFirebase() {
     const db = getDatabase();
@@ -319,38 +385,40 @@ export class MqttHandler {
 
   init(callbackOnLogout) {
     this.logout(callbackOnLogout);
-    this.controlSetting();
+    //this.controlSetting();
     this.autoControl();
-    this.manualControl(); // Thêm điều khiển thủ công
-    this.addTestNotificationButton();
+    this.fanControlSetting();
+    this.lightControlSetting();
+    //this.manualControl(); // Thêm điều khiển thủ công
+    //this.addTestNotificationButton();
   }
 
-  addTestNotificationButton() {
-    // Tạo nút test notification nếu chưa có
-    if (!document.getElementById("testNotificationBtn")) {
-      const testBtn = document.createElement("button");
-      testBtn.id = "testNotificationBtn";
-      testBtn.className = "control-btn";
-      testBtn.innerHTML = "🔔 Test Notification";
-      testBtn.style.marginTop = "10px";
+  // addTestNotificationButton() {
+  //   // Tạo nút test notification nếu chưa có
+  //   if (!document.getElementById("testNotificationBtn")) {
+  //     const testBtn = document.createElement("button");
+  //     testBtn.id = "testNotificationBtn";
+  //     testBtn.className = "control-btn";
+  //     testBtn.innerHTML = "🔔 Test Notification";
+  //     testBtn.style.marginTop = "10px";
 
-      testBtn.addEventListener("click", async () => {
-        testBtn.disabled = true;
-        testBtn.innerHTML = "⏳ Đang gửi...";
+  //     testBtn.addEventListener("click", async () => {
+  //       testBtn.disabled = true;
+  //       testBtn.innerHTML = "⏳ Đang gửi...";
 
-        const success = await this.pushNotifier.testNotification();
+  //       const success = await this.pushNotifier.testNotification();
 
-        testBtn.disabled = false;
-        testBtn.innerHTML = success ? "✅ Đã gửi!" : "❌ Lỗi";
+  //       testBtn.disabled = false;
+  //       testBtn.innerHTML = success ? "✅ Đã gửi!" : "❌ Lỗi";
 
-        setTimeout(() => {
-          testBtn.innerHTML = "🔔 Test Notification";
-        }, 2000);
-      });
+  //       setTimeout(() => {
+  //         testBtn.innerHTML = "🔔 Test Notification";
+  //       }, 2000);
+  //     });
 
-      // Thêm vào container thích hợp
-      const container = document.querySelector(".dashboard-container") || document.body;
-      container.appendChild(testBtn);
-    }
-  }
+  //     // Thêm vào container thích hợp
+  //     const container = document.querySelector(".dashboard-container") || document.body;
+  //     container.appendChild(testBtn);
+  //   }
+  // }
 }

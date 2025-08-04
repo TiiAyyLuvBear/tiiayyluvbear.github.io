@@ -73,7 +73,7 @@ void callback(char *topic, byte *message, unsigned int length)
   {
     msg += (char)message[i];
   }
-  // Serial.println(msg);
+  Serial.println(msg);
   //  Có thể xử lý thêm ở đây
 }
 
@@ -97,6 +97,8 @@ void setup()
   wifiConnect();
   mqttClient.setServer(mqttServer, mqttPort);
   mqttClient.setCallback(callback);
+
+  randomSeed(micros());
 }
 unsigned long lastSend = 0;
 const long interval = 10000; // 60 giây
@@ -119,11 +121,17 @@ void loop()
   {
     lastSend = millis();
 
-    float temp = dht.readTemperature();
-    float hum = dht.readHumidity();
-    int ldrValue = analogRead(LDR_PIN);
+    // float temp = dht.readTemperature();
+    // float hum = dht.readHumidity();
+    // int ldrValue = analogRead(LDR_PIN);
+    // int lightPercent = map(ldrValue, 0, 4095, 0, 100);
+    // bool hasMotion = digitalRead(PIR_PIN);
+
+    float temp = random(20, 50);
+    float hum = random(50, 90);
+    int ldrValue = random(0, 4095);
     int lightPercent = map(ldrValue, 0, 4095, 0, 100);
-    bool hasMotion = digitalRead(PIR_PIN);
+    bool hasMotion = random(0, 1);
 
     // Gửi dữ liệu lên MQTT
     char buffer[10];
@@ -139,14 +147,14 @@ void loop()
     sprintf(buffer, "%d", hasMotion);
     mqttClient.publish("23127263/esp32/motion", buffer);
     // Serial log
-    Serial.print("Nhiet do: ");
-    Serial.print(temp);
-    Serial.print(" | Do am: ");
-    Serial.print(hum);
-    Serial.print(" | Anh sang: ");
-    Serial.print(ldrValue);
-    Serial.print(" | PIR: ");
-    Serial.println(hasMotion ? "Co nguoi" : "Khong co nguoi");
+    // Serial.print("Nhiet do: ");
+    // Serial.print(temp);
+    // Serial.print(" | Do am: ");
+    // Serial.print(hum);
+    // Serial.print(" | Anh sang: ");
+    // Serial.print(ldrValue);
+    // Serial.print(" | PIR: ");
+    // Serial.println(hasMotion ? "Co nguoi" : "Khong co nguoi");
 
     // Hiển thị lên LCD
     lcd.clear();

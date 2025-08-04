@@ -1,17 +1,30 @@
-  <!-- Tab Biểu đồ -->
-  <div id="chart" class="tab">
-    <header>
-      <div class="left-header">
-        <button id="dashBoardBtn">Trang chủ </button>
-      </div>
-      <div class="right-header">
-        <button>admin</button>
-        <button id="logoutBtn2">Đăng xuất</button>
-        <span class="icon">🔔</span>
-      </div>
-    </header>
-    <h2>Biểu đồ nhiệt độ và độ ẩm</h2>
-    <canvas id="tempChart" width="600" height="300"></canvas>
-    <br />
-    <button id="backBtn"> Quay lại</button>
+<!-- Tab Biểu đồ -->
+<div id="chart" class="tab">
+  <header>
+    <div class="left-header">
+      <button id="dashBoardBtn">Trang chủ</button>
+    </div>
+    <div class="right-header">
+      <button>admin</button>
+      <button id="logoutBtn2">Đăng xuất</button>
+      <span class="icon">🔔</span>
+    </div>
+  </header>
+
+  <h2>Biểu đồ nhiệt độ, độ ẩm và ánh sáng</h2>
+
+  <!-- Bộ chọn ngày -->
+  <div style="margin-bottom: 10px;">
+    <label for="startDate">Từ ngày:</label>
+    <input type="date" id="startDate">
+
+    <label for="endDate">Đến ngày:</label>
+    <input type="date" id="endDate">
+
+    <button id="filterBtn">Xem biểu đồ</button>
   </div>
+
+  <canvas id="tempChart" width="600" height="300"></canvas>
+  <br />
+  <button id="backBtn">Quay lại</button>
+</div>

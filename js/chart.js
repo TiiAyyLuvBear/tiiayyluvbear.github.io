@@ -6,9 +6,13 @@ export class ChartDrawer {
   constructor() {
     this.db = getDatabase();
     this.interval = null;
+    this.startDate = new Date().toLocaleDateString();
+    this.endDate = this.startDate;
   }
 
-  async drawChart() {
+  async drawChart(startDate, endDate) {
+    console.log(startDate);
+    console.log(endDate);
     const logRef = query(ref(this.db, "log"), limitToLast(20));
 
     try {
@@ -21,13 +25,22 @@ export class ChartDrawer {
       Object.values(data).forEach(entry => {
         // Nếu bạn lưu time là timestamp thì cần định dạng lại
         // labels.push(new Date(entry.time).toLocaleTimeString());
-        labels.push(entry.time); // Nếu đã là chuỗi giờ
+        const entryDate = new Date(entry.time); // Nếu đã là chuỗi giờ
 
-        light.push(entry.light);
-        temps.push(entry.temperature);
-        humid.push(entry.humidity);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        //alert(entryDate, start, end);
+        end.setDate(end.getDate() + 1);
+
+        if (entryDate >= start && entryDate < end) {
+          entry.time = new Date(entry.time).toLocaleTimeString();
+          labels.push(entry.time);
+          light.push(entry.light);
+          temps.push(entry.temperature);
+          humid.push(entry.humidity);
+        }
       });
-
+ 
       const canvas = document.getElementById("tempChart");
       if (!canvas) {
         console.warn("Không tìm thấy phần tử tempChart để vẽ biểu đồ");
@@ -63,7 +76,7 @@ export class ChartDrawer {
               tension: 0.3
             },
             {
-              label: "Ánh sáng (lux)",
+              label: "Ánh sáng (%)",
               data: light,
               borderColor: "orange",
               backgroundColor: "rgba(255, 165, 0, 0.1)",
@@ -75,9 +88,12 @@ export class ChartDrawer {
         options: {
           responsive: true,
           plugins: {
+            tooltip:{
+              enabled: true,
+            },
             title: {
               display: true,
-              text: "Biểu đồ nhiệt độ, độ ẩm và ánh sáng theo thời gian"
+              //text: "Biểu đồ nhiệt độ, độ ẩm và ánh sáng theo thời gian"
             }
           },
           scales: {
@@ -117,11 +133,72 @@ export class ChartDrawer {
     });
   }
 
+  filter(){
+
+    const filterer = document.getElementById("filterBtn");
+
+    filterer.addEventListener("click", (event) =>{
+      event.preventDefault()
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+
+      if(!startDate || !endDate){
+        alert("Thiếu ngày bắt đầu hoặc ngày kết thúc!!");
+        return;
+      }
+      
+      this.startDate = startDate;
+      this.endDate = endDate;
+
+      this.drawChart(this.startDate, this.endDate);
+      
+    })
+
+  }
+
+  onClickPoint(){
+  const canvas = document.getElementById("tempChart");
+
+  if (!canvas) {
+    console.warn("Không tìm thấy phần tử tempChart để gán sự kiện click");
+    return;
+  }
+
+  canvas.onclick = (evt) => {
+    const points = this.chartInstance.getElementsAtEventForMode(
+      evt,
+      'nearest',
+      { intersect: true },
+      true
+    );
+
+    if (points.length) {
+      const point = points[0];
+      const dataset = this.chartInstance.data.datasets[point.datasetIndex];
+      const label = this.chartInstance.data.labels[point.index];
+      const value = dataset.data[point.index];
+
+    }
+  };    
+
+  }
+
   init(callbackOnSuccess) {
-    this.drawChart();
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`; // đúng định dạng yyyy-mm-dd
+
+    document.getElementById("startDate").value = todayStr;
+    document.getElementById("endDate").value = todayStr;
+
+    this.drawChart(this.startDate, this.endDate); 
     this.logout(callbackOnSuccess);
 
-    // Cập nhật biểu đồ mỗi 30 giây
-    this.interval = setInterval(() => this.drawChart(), 30000);
+    this.filter();
+    this.onClickPoint();
+    this.interval = setInterval(() => this.drawChart(this.startDate, this.endDate), 30000);
   }
 }

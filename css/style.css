@@ -147,6 +147,22 @@ h2 {
   font-weight: bold;
 }
 
+#signup {
+  padding: 50px;
+  text-align: center;
+}
+
+#signup input {
+  padding: 10px;
+  margin: 10px;
+  width: 200px;
+}
+
+#signup button {
+  padding: 10px 20px;
+  font-weight: bold;
+}
+
 /* Chart tab */
 #chart {
   padding: 20px;
@@ -214,7 +230,7 @@ canvas {
   background-color: #eee;
 }
 
-#thresholdOverlay {
+#fanThresholdOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -227,9 +243,27 @@ canvas {
   z-index: 2000;
 }
 
-#thresholdOverlay.active {
+#fanThresholdOverlay.active {
   display: flex;
 }
+
+#lightThresholdOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Làm mờ nền */
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+#lightThresholdOverlay.active {
+  display: flex;
+}
+
 
 .popup {
   background: #fff;
@@ -281,7 +315,13 @@ canvas {
   background-color: #5e93b0;
 }
 
-#thresholdOverlay.active ~ #dashboard {
+#fanThresholdOverlay.active ~ #dashboard {
+  filter: blur(30px);
+  pointer-events: none;
+  user-select: none;
+}
+
+#lightThresholdOverlay.active ~ #dashboard {
   filter: blur(30px);
   pointer-events: none;
   user-select: none;

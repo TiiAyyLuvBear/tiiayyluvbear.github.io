@@ -12,65 +12,10 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- Nội dung sẽ được load vào đây -->
+  <div id="content"></div>
 
-  <!-- Tab Đăng Nhập -->
-  <div id="loginTab" class="tab">
-    <h2>Đăng nhập</h2>
-    <input id="username" placeholder="Tên đăng nhập">
-    <input id="password" type="password" placeholder="Mật khẩu">
-    <br>
-    <button id="loginBtn">Đăng nhập</button>
-  </div>
-
-  <!-- Tab Dashboard -->
-  <div id="dataTab" class="tab">
-    <header>
-      <div class="left-header">
-        <button id="chartBtn">Thống kê</button>
-      </div>
-      <div class="right-header">
-        <button>admin</button>
-        <button id="logoutBtn">Đăng xuất</button>
-        <span class="icon">🔔</span>
-      </div>
-    </header>
-
-    <div class="container">
-      <div class="column">
-        <h2>Trạng thái hiện tại</h2>
-        <div class="status-grid">
-          <div class="status-box" id="tempBox">🌡️ Nhiệt độ:<br>--&deg; C</div>
-          <div class="status-box" id="humiBox">💧 Độ ẩm:<br>--%</div>
-          <div class="status-box">💡 Ánh sáng:<br>800 lx</div>
-          <div class="status-box">👤 Trạng thái:<br>Có người</div>
-        </div>
-      </div>
-      <div class="column">
-        <h2>Điều khiển <span class="icon">⚙️</span></h2>
-        <div class="control-box">
-          <div>🌀 Quạt</div>
-          <div class="toggle-switch on"></div>
-        </div>
-        <div class="control-box">
-          <div>💡 Đèn</div>
-          <div class="toggle-switch"></div>
-        </div>
-        <div class="auto-toggle">
-          Tự động bật/tắt ✅
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab Biểu đồ -->
-  <div id="chartTab" class="tab">
-    <h2>Biểu đồ nhiệt độ và độ ẩm</h2>
-    <canvas id="myChart"></canvas>
-    <br>
-    <button id="backBtn">⬅ Quay lại</button>
-  </div>
-
-  <!-- JavaScript OOP -->
+  <!-- JavaScript load các file HTML con -->
   <script>
     async function loadHTML(file) {
       const res = await fetch(file);

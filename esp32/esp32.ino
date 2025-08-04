@@ -1,32 +1,36 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <DHT.h>
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
+#define DHTPIN 4
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Pin setup
+#define LDR_PIN 34 // Analog input
+#define PIR_PIN 5  // Digital input
+#define BUZZER_PIN 14
+#define LED_FAN 16
+#define LED_LIGHT 17
+#define RELAY_FAN 18
+#define RELAY_LIGHT 19
+
+// WiFi + MQTT config
 const char *ssid = "Wokwi-GUEST";
 const char *password = "";
-
-// MQTT Server
 const char *mqttServer = "broker.hivemq.com";
-int port = 1883;
-
-// Sensor pins
-#define PIR_PIN 2        // PIR sensor pin
-#define LIGHT_PIN A0     // Light sensor (LDR) pin
-#define LED_PIN 13       // LED indicator pin
+int mqttPort = 1883;
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-// Variables for sensor readings
-bool lastMotionState = false;
-int lastLightLevel = -1;
-unsigned long lastSensorRead = 0;
-const unsigned long sensorInterval = 2000; // Read sensors every 2 seconds
 
 void wifiConnect()
 {
   WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
@@ -44,10 +48,11 @@ void mqttConnect()
     if (mqttClient.connect(clientId.c_str()))
     {
       Serial.println("Connected to MQTT");
-
-      // Subscribe
-      mqttClient.subscribe("23127263/esp32/humidity");
+      // Bạn có thể thêm các subscribe nếu cần
       mqttClient.subscribe("23127263/esp32/temperature");
+      mqttClient.subscribe("23127263/esp32/humidity");
+      mqttClient.subscribe("23127263/esp32/light");
+      mqttClient.subscribe("23127263/esp32/motion");
     }
     else
     {
@@ -58,7 +63,6 @@ void mqttConnect()
     }
   }
 }
-
 void callback(char *topic, byte *message, unsigned int length)
 {
   // Serial.print("Message arrived [");
@@ -76,33 +80,32 @@ void callback(char *topic, byte *message, unsigned int length)
 void setup()
 {
   Serial.begin(115200);
-  
-  // Initialize pins
-  pinMode(PIR_PIN, INPUT);
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
-  
-  Serial.print("Connecting to WiFi");
-  wifiConnect();
-  mqttClient.setServer(mqttServer, port);
-  mqttClient.setCallback(callback);
-  mqttClient.setKeepAlive(90);
+  Wire.begin(32, 33); // SDA, SCL
+  dht.begin();
 
-  lcd.init();
+  lcd.begin(16, 2);
   lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print("ESP32 IoT Ready");
-  lcd.setCursor(0, 1);
-  lcd.print("Sensors: Online");
-  delay(2000);
-  lcd.clear();
+
+  pinMode(PIR_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(LED_FAN, OUTPUT);
+  pinMode(LED_LIGHT, OUTPUT);
+  pinMode(RELAY_FAN, OUTPUT);
+  pinMode(RELAY_LIGHT, OUTPUT);
+
+  // WiFi & MQTT
+  wifiConnect();
+  mqttClient.setServer(mqttServer, mqttPort);
+  mqttClient.setCallback(callback);
 }
+unsigned long lastSend = 0;
+const long interval = 10000; // 60 giây
 
 void loop()
 {
   if (WiFi.status() != WL_CONNECTED)
   {
-    Serial.println("WiFi disconnected! Reconnecting...");
+    Serial.println("WiFi disconnected. Reconnecting...");
     wifiConnect();
   }
 
@@ -112,59 +115,52 @@ void loop()
   }
 
   mqttClient.loop();
+  if (millis() - lastSend >= interval)
+  {
+    lastSend = millis();
 
-  // Read sensors every sensorInterval milliseconds
-  if (millis() - lastSensorRead >= sensorInterval) {
-    readAndPublishSensors();
-    lastSensorRead = millis();
+    float temp = dht.readTemperature();
+    float hum = dht.readHumidity();
+    int ldrValue = analogRead(LDR_PIN);
+    int lightPercent = map(ldrValue, 0, 4095, 0, 100);
+    bool hasMotion = digitalRead(PIR_PIN);
+
+    // Gửi dữ liệu lên MQTT
+    char buffer[10];
+    sprintf(buffer, "%.2f", temp);
+    mqttClient.publish("23127263/esp32/temperature", buffer);
+
+    sprintf(buffer, "%.2f", hum);
+    mqttClient.publish("23127263/esp32/humidity", buffer);
+
+    sprintf(buffer, "%d", lightPercent);
+    mqttClient.publish("23127263/esp32/light", buffer);
+
+    sprintf(buffer, "%d", hasMotion);
+    mqttClient.publish("23127263/esp32/motion", buffer);
+    // Serial log
+    Serial.print("Nhiet do: ");
+    Serial.print(temp);
+    Serial.print(" | Do am: ");
+    Serial.print(hum);
+    Serial.print(" | Anh sang: ");
+    Serial.print(ldrValue);
+    Serial.print(" | PIR: ");
+    Serial.println(hasMotion ? "Co nguoi" : "Khong co nguoi");
+
+    // Hiển thị lên LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("T:");
+    lcd.print(temp);
+    lcd.print(" H:");
+    lcd.print(hum);
+
+    lcd.setCursor(0, 1);
+    lcd.print("L:");
+    lcd.print(ldrValue);
+    lcd.print(hasMotion ? " Motion" : " NoMove");
+
+    // delay(1000);
   }
-
-  delay(100); // Small delay to prevent blocking
-}
-
-void readAndPublishSensors() {
-  char buffer[10];
-
-  // Generate random temperature and humidity (you can replace with real sensors)
-  int temperature = random(15, 45); // Temperature range: 15-45°C
-  int humidity = random(40, 80);    // Humidity range: 40-80%
-
-  // Read PIR sensor
-  bool motionDetected = digitalRead(PIR_PIN);
-  
-  // Read light sensor (LDR) - convert to percentage
-  int lightRaw = analogRead(LIGHT_PIN);
-  int lightLevel = map(lightRaw, 0, 4095, 0, 100); // Convert to 0-100%
-  
-  // Update LCD display
-  lcd.setCursor(0, 0);
-  lcd.print("T:" + String(temperature) + "C H:" + String(humidity) + "%   ");
-  lcd.setCursor(0, 1);
-  lcd.print("L:" + String(lightLevel) + "% M:" + (motionDetected ? "YES" : "NO ") + "   ");
-
-  // Publish temperature
-  sprintf(buffer, "%d", temperature);
-  mqttClient.publish("23127263/esp32/temperature", buffer);
-
-  // Publish humidity
-  sprintf(buffer, "%d", humidity);
-  mqttClient.publish("23127263/esp32/humidity", buffer);
-
-  // Publish light level
-  sprintf(buffer, "%d", lightLevel);
-  mqttClient.publish("23127263/esp32/light", buffer);
-
-  // Publish motion detection (only when state changes)
-  if (motionDetected != lastMotionState) {
-    mqttClient.publish("23127263/esp32/motion", motionDetected ? "1" : "0");
-    lastMotionState = motionDetected;
-    
-    // Control LED based on motion
-    digitalWrite(LED_PIN, motionDetected ? HIGH : LOW);
-    
-    Serial.println("Motion detected: " + String(motionDetected ? "YES" : "NO"));
-  }
-
-  // Log sensor readings
-  Serial.println("Temperature: " + String(temperature) + "°C, Humidity: " + String(humidity) + "%, Light: " + String(lightLevel) + "%, Motion: " + String(motionDetected ? "YES" : "NO"));
 }

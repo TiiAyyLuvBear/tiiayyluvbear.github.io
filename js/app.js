@@ -1,10 +1,12 @@
 import { Auth } from './auth.js';
 import { MqttHandler } from './dashboard.js';
 import { ChartDrawer } from './chart.js';
+import { NotificationConfig } from './notification-config.js';
 
 const auth = new Auth();
 const mqttHandler = new MqttHandler();
 const chart = new ChartDrawer();
+const notificationConfig = new NotificationConfig(); // Assuming this is defined in your project
 
 class App {
   constructor() {
@@ -33,25 +35,47 @@ class App {
         mqttHandler.logUserActivity?.("navigation", "Xem trang thống kê");
       });
     }
+    const btnNotificationSettings = document.getElementById('notificationBtn');
+    if (btnNotificationSettings) {
+      btnNotificationSettings.addEventListener('click', () => {
+        this.showTab('notification');
+        mqttHandler.logUserActivity?.("navigation", "Xem cài đặt thông báo");
+      });
+    }
 
-    const btnDashboard = document.getElementById('dashBoardBtn');
-    if (btnDashboard) {
-      btnDashboard.addEventListener('click', () => {
+    // const btnDashboard = document.getElementById('dashBoardBtn');
+    // if (btnDashboard) {
+    //   btnDashboard.addEventListener('click', () => {
+    //     this.showTab('dashboard');
+    //     mqttHandler.logUserActivity?.("navigation", "Quay về trang chính");
+    //   })
+    // }
+    
+    //Cái này t sửa để dùng chung nút quay về dashboard
+    document.addEventListener('click', (e) => {
+      // Nút quay về Dashboard
+      if (e.target && e.target.id === 'dashBoardBtn') {
         this.showTab('dashboard');
         mqttHandler.logUserActivity?.("navigation", "Quay về trang chính");
-      })
-    }
+      }
 
-    const btnBack = document.getElementById('backBtn');
-    if (btnBack) {
-      btnBack.addEventListener('click', () => {
-        this.showTab('dashboard');
-        mqttHandler.logUserActivity?.("navigation", "Quay về dashboard");
-      })
-    }
+      // Nút đăng xuất (dùng chung cho mọi tab)
+      if (e.target && e.target.id === 'logoutBtn') {
+        auth.logout(() => {
+          this.showTab('login');
+        });
+      }
+      
+      if (e.target && e.target.id === 'logoutBtn2') {
+        auth.logout(() => {
+          this.showTab('login');
+        });
+      }
+    });
+
 
   }
-
+  
   showTab(tabId) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     const target = document.getElementById(tabId);

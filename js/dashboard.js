@@ -5,8 +5,6 @@ import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/
 
 const db = getDatabase(app);
 
-
-
 export class Dashboard {
   constructor() {
     this.client = null;
@@ -37,16 +35,14 @@ export class Dashboard {
       this.client.subscribe("23127263/esp32/light");
       this.client.subscribe("23127263/esp32/motion");
       this.client.subscribe("23127263/esp32/control/fan");
-      this.client.subscribe("23127263/esp32/control/light");
+      this.client.subscribe("23127263/esp32/control/lamp");
     });
 
     this.client.on("message", (topic, message) => {
       const value = message.toString();
       const key = topic.split("/").pop();  // "temperature", "humidity", ...
-      //console.log(key);
-      // Hiển thị và xử lý như trước
       if (key === "temperature") {
-        const temp = parseFloat(value);
+        const temp = parseInt(value);
         this.temperature = temp;
         document.getElementById("tempBox").innerHTML = `🌡️ Nhiệt độ: ${value} °C`;
         // this.pushNotifier.checkAndNotifyTemperature(temp);
@@ -54,7 +50,7 @@ export class Dashboard {
       }
 
       if (key === "humidity") {
-        this.humidity = parseFloat(value);
+        this.humidity = parseInt(value);
         document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${value} %`;
         this.cache.humidity = parseInt(value);
       }
@@ -62,23 +58,32 @@ export class Dashboard {
       if (key === "light") {
         const light = parseInt(value);
         this.light = light;
-        document.getElementById("lightBox").innerHTML = `Độ sáng: ${value} %`;
+        document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${value} %`;
         //this.pushNotifier.checkAndNotifyLight(light);
         this.cache.light = light;
       }
 
       if (key === "motion") {
-        const motionDetected = value === "1" || value.toLowerCase() === "detected";
-        this.motion = this.motion = value ? `Co nguoi`:  `Khong co nguoi`;
+        const motionValue = parseInt(value);  // sẽ luôn là 1 hoặc 0 nếu ESP32 gửi đúng
+
+        this.motion = motionValue;  // dùng cho autoControl
+
+        // Hiển thị ra giao diện
         const motionBox = document.getElementById("motionBox");
         if (motionBox) {
-          motionBox.innerHTML = `👤 Trạng thái: ${motionDetected ? 'Có chuyển động' : 'Không có chuyển động'}`;
+          motionBox.innerHTML = `👤 Trạng thái: ${motionValue === 1 ? 'Có người' : 'Không có người'}`;
         }
-        if (motionDetected) {
-          this.pushNotifier.checkAndNotifyMotion(true);
-        }
-        this.cache.motion = motionDetected ? 1 : 0;
+
+        // Gửi thông báo nếu có chuyển động
+        // if (motionValue === 1) {
+        //   this.pushNotifier.checkAndNotifyMotion(true);
+        // }
+
+        // Lưu vào cache để đẩy Firebase
+        this.cache.motion = motionValue;
+
       }
+
 
       //Gửi Firebase nếu đủ dữ liệu
       if (this.cache.temperature !== undefined &&
@@ -102,7 +107,7 @@ export class Dashboard {
         };
 
         // Ghi duy nhất vào nhánh /sensor/yyyy-mm-dd/
-        const logRef = ref(getDatabase(), `/sensor/${dateStr}/` );
+        const logRef = ref(getDatabase(), `/sensor/${dateStr}/`);
         push(logRef, payload)
           .then(() => {
             console.log("✅ Dữ liệu đã được lưu vào Firebase:", payload);
@@ -117,36 +122,59 @@ export class Dashboard {
     });
 
 
-  setInterval(() => {
-    if (!this.autoMode) return;
+    setInterval(() => {
+      if (!this.autoMode) return;
+      // ======= NO MOTION: TURN OFF EVERYTHING =======
+      if (this.motion === 0 || this.motion === null) {
+        if (this.currentFanState !== "off") {
+          this.client?.publish("23127263/esp32/control/fan", "off");
+          document.getElementById("fanSwitch").checked = false;
+          this.currentFanState = "off";
+          logUserAction("fan_control", "auto_control: off");
+          console.log("Fan Off (No Motion)");
+        }
 
-    // ======= FAN CONTROL =======
-    if (this.temperature >= this.fanOn && this.currentFanState !== "on") {
-      this.client?.publish("23127263/esp32/control/fan", "on");
-      document.getElementById("fanSwitch").checked = true;
-      this.currentFanState = "on";
-      console.log("Fan On");
-    } else if (this.temperature <= this.fanOff && this.currentFanState !== "off") {
-      this.client?.publish("23127263/esp32/control/fan", "off");
-      document.getElementById("fanSwitch").checked = false;
-      this.currentFanState = "off";
-      console.log("Fan Off");
-    }
+        if (this.currentLampState !== "off") {
+          this.client?.publish("23127263/esp32/control/lamp", "off");
+          document.getElementById("lightSwitch").checked = false;
+          this.currentLampState = "off";
+          logUserAction("lamp_control", "auto_control: off");
+          console.log("Light Off (No Motion)");
+        }
 
-    // ======= LAMP CONTROL =======
-    if (this.light <= this.lightOn && this.currentLampState !== "on") {
-      this.client?.publish("23127263/esp32/control/lamp", "on");
-      document.getElementById("lightSwitch").checked = true;
-      this.currentLampState = "on";
-      console.log("Light On");
-    } else if (this.light >= this.lightOff && this.currentLampState !== "off") {
-      this.client?.publish("23127263/esp32/control/lamp", "off");
-      document.getElementById("lightSwitch").checked = false;
-      this.currentLampState = "off";
-      console.log("Light Off");
-    }
+        return; // không tiếp tục kiểm tra nhiệt độ/ánh sáng nếu không có người
+      }
+      // ======= FAN CONTROL =======
+      if (this.temperature >= this.fanOn && this.currentFanState !== "on") {
+        this.client?.publish("23127263/esp32/control/fan", "on");
+        document.getElementById("fanSwitch").checked = true;
+        this.currentFanState = "on";
+        logUserAction("fan_control", "auto_control: on");
+        console.log("Fan On");
+      } else if (this.temperature <= this.fanOff && this.currentFanState !== "off") {
+        this.client?.publish("23127263/esp32/control/fan", "off");
+        document.getElementById("fanSwitch").checked = false;
+        this.currentFanState = "off";
+        logUserAction("fan_control", "auto_control: off");
+        console.log("Fan Off");
+      }
 
-  }, 5000);
+      // ======= LAMP CONTROL =======
+      if (this.light <= this.lightOn && this.currentLampState !== "on") {
+        this.client?.publish("23127263/esp32/control/lamp", "on");
+        document.getElementById("lightSwitch").checked = true;
+        this.currentLampState = "on";
+        logUserAction("lamp_control", "auto_control: on");
+        console.log("Light On");
+      } else if (this.light >= this.lightOff && this.currentLampState !== "off") {
+        this.client?.publish("23127263/esp32/control/lamp", "off");
+        document.getElementById("lightSwitch").checked = false;
+        this.currentLampState = "off";
+        logUserAction("lamp_control", "auto_control: off");
+        console.log("Light Off");
+      }
+
+    }, 5000);
 
     this.autoControl();
 
@@ -157,14 +185,15 @@ export class Dashboard {
 
     autoSwitch?.addEventListener("change", () => {
       this.autoMode = autoSwitch.checked;
+      logUserAction("auto_control", this.autoMode ? "on" : "off");
       console.log("Tự động:", this.autoMode);
     });
   }
-  fanControlSetting(){
+  fanControlSetting() {
 
     const overlay = document.getElementById("fanThresholdOverlay");
     const dashboard = document.getElementById("dashboard");
-    const fanOn    = document.getElementById("fanOn");
+    const fanOn = document.getElementById("fanOn");
     const fanOnValue = document.getElementById("fanOnValue");
     const fanOff = document.getElementById("fanOff");
     const fanOffValue = document.getElementById("fanOffValue");
@@ -174,18 +203,29 @@ export class Dashboard {
     controlBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         overlay.classList.add("active");
-        dashboard?.classList.add("blurred"); 
+        dashboard?.classList.add("blurred");
+
+        // Lưu lịch sử mở popup cài đặt ngưỡng quạt
+        logUserAction("fan_threshold_popup", "opened");
       });
     });
 
     closePopupBtn?.addEventListener("click", () => {
       overlay.classList.remove("active");
-      dashboard?.classList.remove("blurred"); 
+      dashboard?.classList.remove("blurred");
+
+      // Lưu lịch sử đóng popup cài đặt ngưỡng quạt
+      logUserAction("fan_threshold_popup", "closed");
+      logUserAction("fan_threshold_popup", `fanOn:` + this.fanOn + `°C, fanOff: ` + this.fanOff + `°C`);
     });
 
     fanOn?.addEventListener("input", () => {
       fanOnValue.textContent = fanOn.value;
       this.fanOn = parseFloat(fanOn.value);
+
+      // Lưu lịch sử thay đổi ngưỡng quạt bật
+      // logUserAction("fan_threshold_change", `fanOn: ${this.fanOn}°C `);
+
       // Update temperature threshold for notifications
       this.pushNotifier.updateThresholds({
         temperature: { high: parseInt(fanOn.value), low: 10 }
@@ -195,6 +235,10 @@ export class Dashboard {
     fanOff?.addEventListener("input", () => {
       fanOffValue.textContent = fanOff.value;
       this.fanOff = parseFloat(fanOff.value);
+
+      // Lưu lịch sử thay đổi ngưỡng quạt tắt
+      // logUserAction("fan_threshold_change", `fanOff: ${this.fanOff}°C `);
+
       // Update light threshold for notifications
       this.pushNotifier.updateThresholds({
         light: { low: parseInt(fanOff.value) }
@@ -202,11 +246,11 @@ export class Dashboard {
     });
   }
 
-    lightControlSetting(){
+  lightControlSetting() {
 
     const overlay = document.getElementById("lightThresholdOverlay");
     const dashboard = document.getElementById("dashboard");
-    const lightOn    = document.getElementById("lightOn");
+    const lightOn = document.getElementById("lightOn");
     const lightOnValue = document.getElementById("lightOnValue");
     const lightOff = document.getElementById("lightOff");
     const lightOffValue = document.getElementById("lightOffValue");
@@ -216,18 +260,29 @@ export class Dashboard {
     controlBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         overlay.classList.add("active");
-        dashboard?.classList.add("blurred"); 
+        dashboard?.classList.add("blurred");
+
+        // Lưu lịch sử mở popup cài đặt ngưỡng đèn
+        logUserAction("light_threshold_popup", "opened");
       });
     });
 
     closePopupBtn?.addEventListener("click", () => {
       overlay.classList.remove("active");
-      dashboard?.classList.remove("blurred"); 
+      dashboard?.classList.remove("blurred");
+
+      // Lưu lịch sử đóng popup cài đặt ngưỡng đèn
+      logUserAction("light_threshold_popup", 'lighOn: ' + this.lightOn + ', lightOff: ' + this.lightOff);
+      logUserAction("light_threshold_popup", "closed");
     });
 
     lightOn?.addEventListener("input", () => {
       lightOnValue.textContent = lightOn.value;
       this.lightOn = parseFloat(lightOn.value);
+
+      // Lưu lịch sử thay đổi ngưỡng đèn bật
+      // logUserAction("light_threshold_change", `lightOn: ${this.lightOn}% `);
+
       // Update temperature threshold for notifications
       this.pushNotifier.updateThresholds({
         temperature: { high: parseInt(fanOn.value), low: 10 }
@@ -237,6 +292,10 @@ export class Dashboard {
     lightOff?.addEventListener("input", () => {
       lightOffValue.textContent = lightOff.value;
       this.lightOff = parseFloat(lightOff.value);
+
+      // Lưu lịch sử thay đổi ngưỡng đèn tắt
+      // logUserAction("light_threshold_change", `lightOff: ${this.lightOff}%`);
+
       // Update light threshold for notifications
       this.pushNotifier.updateThresholds({
         light: { low: parseInt(fanOff.value) }
@@ -246,40 +305,45 @@ export class Dashboard {
 
   // Thêm chức năng điều khiển thủ công đèn/quạt
   manualControl() {
-    // Điều khiển quạt
-    const fanToggle = document.querySelector(".fan-toggle");
+    const fanToggle = document.getElementById("fanSwitch");
     if (fanToggle) {
       fanToggle.addEventListener("click", () => {
+        // Lấy trạng thái hiện tại của nút
         const isOn = fanToggle.classList.contains("on");
-        if (isOn) {
-          fanToggle.classList.remove("on");
-          this.client?.publish("23127263/esp32/control/fan", "off");
-          console.log("Fan: OFF (Manual)");
-        } else {
-          fanToggle.classList.add("on");
-          this.client?.publish("23127263/esp32/control/fan", "on");
-          console.log("Fan: ON (Manual)");
-        }
+        const newState = isOn ? "off" : "on";
+
+        // Gửi tín hiệu điều khiển lên ESP32 qua MQTT
+        this.client?.publish("23127263/esp32/control/fan", newState);
+        logUserAction("fan_control", "manual_control: " + newState);
+
+        // Cập nhật lại giao diện
+        fanToggle.checked = (newState === "on");
+        fanToggle.classList.toggle("on", newState === "on");
+        this.currentFanState = newState; // Lưu trạng thái
+        console.log(`Fan ${newState === "on" ? "On" : "Off"} (Manual Control)`);
       });
     }
 
-    // Điều khiển đèn
-    const lightToggle = document.querySelector(".light-toggle");
+    const lightToggle = document.getElementById("lightSwitch");
     if (lightToggle) {
       lightToggle.addEventListener("click", () => {
         const isOn = lightToggle.classList.contains("on");
-        if (isOn) {
-          lightToggle.classList.remove("on");
-          this.client?.publish("23127263/esp32/control/light", "off");
-          console.log("Light: OFF (Manual)");
-        } else {
-          lightToggle.classList.add("on");
-          this.client?.publish("23127263/esp32/control/light", "on");
-          console.log("Light: ON (Manual)");
-        }
+        const newState = isOn ? "off" : "on";
+
+        this.client?.publish("23127263/esp32/control/lamp", newState);
+        logUserAction("lamp_control", "manual_control: " + newState);
+
+
+        lightToggle.checked = (newState === "on");
+        lightToggle.classList.toggle("on", newState === "on");
+        this.currentLampState = newState;
+        console.log(`Light ${newState === "on" ? "On" : "Off"} (Manual Control)`);
       });
     }
   }
+
+
+
 
   logout(callbackOnSuccess) {
     const logoutBtn = document.getElementById("logoutBtn");
@@ -294,6 +358,9 @@ export class Dashboard {
       }
 
       signOut(auth).then(() => {
+        // Lưu lịch sử logout
+        logUserAction("user_logout", "dashboard_session_ended");
+
         console.log("Signed out from Firebase");
         callbackOnSuccess();
       });
@@ -399,15 +466,17 @@ export class Dashboard {
 
 
   init(callbackOnLogout) {
-    document.getElementById("tempBox").innerHTML = `Nhiệt độ: ${this.temperature} °C`;
-    document.getElementById("humiBox").innerHTML = `Độ ẩm: ${this.humidity} °%`;
-    document.getElementById("lightBox").innerHTML = `Độ sáng: ${this.light} °%`;
-    document.getElementById("motionBox").innerHTML = `Trạng thái: ${this.motion}`;
+    // Lưu lịch sử đăng nhập và khởi tạo dashboard
+
+    document.getElementById("tempBox").innerHTML = ` 🌡️ Nhiệt độ: ${this.temperature} °C`;
+    document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${this.humidity} °%`;
+    document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${this.light} °%`;
+    document.getElementById("motionBox").innerHTML = `👤 Trạng thái: ${this.motion}`;
     this.connect();
     this.logout(callbackOnLogout);
     this.fanControlSetting();
     this.lightControlSetting();
-    //this.manualControl(); // Thêm điều khiển thủ công
+    this.manualControl(); // Thêm điều khiển thủ công
     //this.addTestNotificationButton();
   }
 

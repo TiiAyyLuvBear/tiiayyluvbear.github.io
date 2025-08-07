@@ -7,7 +7,7 @@ const db = getDatabase(app);
 
 
 
-export class MqttHandler {
+export class Dashboard {
   constructor() {
     this.client = null;
     this.pushNotifier = new PushsaferNotifier();
@@ -21,6 +21,8 @@ export class MqttHandler {
     this.fanOff = 0;
     this.lightOn = 0;
     this.lightOff = 0;
+    this.currentFanState = null;
+    this.currentLampState = null;
   }
 
   connect() {
@@ -48,13 +50,13 @@ export class MqttHandler {
         this.temperature = temp;
         document.getElementById("tempBox").innerHTML = `🌡️ Nhiệt độ: ${value} °C`;
         // this.pushNotifier.checkAndNotifyTemperature(temp);
-        //this.cache.temperature = temp;
+        this.cache.temperature = temp;
       }
 
       if (key === "humidity") {
         this.humidity = parseFloat(value);
         document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${value} %`;
-        //this.cache.humidity = parseInt(value);
+        this.cache.humidity = parseInt(value);
       }
 
       if (key === "light") {
@@ -62,7 +64,7 @@ export class MqttHandler {
         this.light = light;
         document.getElementById("lightBox").innerHTML = `Độ sáng: ${value} %`;
         //this.pushNotifier.checkAndNotifyLight(light);
-        //this.cache.light = light;
+        this.cache.light = light;
       }
 
       if (key === "motion") {
@@ -100,6 +102,7 @@ export class MqttHandler {
         };
 
         // Ghi duy nhất vào nhánh /sensor/yyyy-mm-dd/
+        const logRef = ref(getDatabase(), `/sensor/${dateStr}/` );
         push(logRef, payload)
           .then(() => {
             console.log("✅ Dữ liệu đã được lưu vào Firebase:", payload);
@@ -114,25 +117,38 @@ export class MqttHandler {
     });
 
 
-    this.autoControl();
-    if (this.autoMode) {
-      if (this.temperature >= this.upperTemperature) {
-        this.client.publish("23127263/esp32/control/fan", "on");
-        document.getElementById("fanSwitch").add("active");
-      } else if (this.temperature <= this.lowerTemperature) {
-        this.client.publish("23127263/esp32/control/fan", "off");
-        document.getElementById("fanSwitch").remove("active");
-      }
+  setInterval(() => {
+    if (!this.autoMode) return;
 
-      // Kiểm tra ánh sáng để điều khiển đèn
-      if (this.light <= this.lightOn) {
-      this.client.publish("23127263/esp32/control/lamp", "on");
-      document.getElementById("lightSwitch").add("active");
-      } else if (this.light >= this.lightOff) {
-        this.client.publish("23127263/esp32/control/lamp", "off");
-        document.getElementById("lightSwitch").remove("active");
-      }
+    // ======= FAN CONTROL =======
+    if (this.temperature >= this.fanOn && this.currentFanState !== "on") {
+      this.client?.publish("23127263/esp32/control/fan", "on");
+      document.getElementById("fanSwitch").checked = true;
+      this.currentFanState = "on";
+      console.log("Fan On");
+    } else if (this.temperature <= this.fanOff && this.currentFanState !== "off") {
+      this.client?.publish("23127263/esp32/control/fan", "off");
+      document.getElementById("fanSwitch").checked = false;
+      this.currentFanState = "off";
+      console.log("Fan Off");
     }
+
+    // ======= LAMP CONTROL =======
+    if (this.light <= this.lightOn && this.currentLampState !== "on") {
+      this.client?.publish("23127263/esp32/control/lamp", "on");
+      document.getElementById("lightSwitch").checked = true;
+      this.currentLampState = "on";
+      console.log("Light On");
+    } else if (this.light >= this.lightOff && this.currentLampState !== "off") {
+      this.client?.publish("23127263/esp32/control/lamp", "off");
+      document.getElementById("lightSwitch").checked = false;
+      this.currentLampState = "off";
+      console.log("Light Off");
+    }
+
+  }, 5000);
+
+    this.autoControl();
 
   }
 
@@ -383,9 +399,12 @@ export class MqttHandler {
 
 
   init(callbackOnLogout) {
+    document.getElementById("tempBox").innerHTML = `Nhiệt độ: ${this.temperature} °C`;
+    document.getElementById("humiBox").innerHTML = `Độ ẩm: ${this.humidity} °%`;
+    document.getElementById("lightBox").innerHTML = `Độ sáng: ${this.light} °%`;
+    document.getElementById("motionBox").innerHTML = `Độ sáng: ${this.motion}`;
+    this.connect();
     this.logout(callbackOnLogout);
-    //this.controlSetting();
-    this.autoControl();
     this.fanControlSetting();
     this.lightControlSetting();
     //this.manualControl(); // Thêm điều khiển thủ công

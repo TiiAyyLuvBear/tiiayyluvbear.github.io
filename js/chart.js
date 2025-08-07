@@ -6,20 +6,15 @@ export class ChartDrawer {
   constructor() {
     this.db = getDatabase();
     this.interval = null;
-    this.startDate = new Date().toLocaleDateString();
-    this.endDate = this.startDate;
+    this.startDate = null;
   }
 
 
-  async drawChart(startDate, endDate) {
-    // console.log(startDate);
-    // console.log(endDate);
 
-    const now = new Date();
-    const pad = (n) => n.toString().padStart(2, '0');
-    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-    //console.log(dateStr);
+  async drawChart(startDate) {
+
     const database = `sensor/${startDate}`;
+    console.log(database);
     const logRef = query(ref(this.db, database), limitToLast(20));
 
     try {
@@ -33,22 +28,13 @@ export class ChartDrawer {
       const labels = [], temps = [], light = [], humid = [];
 
       Object.values(data).forEach(entry => {
-        // Nếu bạn lưu time là timestamp thì cần định dạng lại
-        // labels.push(new Date(entry.time).toLocaleTimeString());
-        const entryDate = new Date(entry.time); // Nếu đã là chuỗi giờ
 
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        //alert(entryDate, start, end);
-        end.setDate(end.getDate() + 1);
 
-        if (entryDate >= start && entryDate < end) {
           entry.time = new Date(entry.time).toLocaleTimeString();
           labels.push(entry.time);
           light.push(entry.light);
           temps.push(entry.temperature);
           humid.push(entry.humidity);
-        }
       });
 
       const canvas = document.getElementById("tempChart");
@@ -151,17 +137,17 @@ export class ChartDrawer {
     filterer.addEventListener("click", (event) => {
       event.preventDefault()
       const startDate = document.getElementById("startDate").value;
-      const endDate = document.getElementById("endDate").value;
-
-      if (!startDate || !endDate) {
+     
+     
+      if (!startDate) {
         alert("Thiếu ngày bắt đầu hoặc ngày kết thúc!!");
         return;
       }
 
       this.startDate = startDate;
-      this.endDate = endDate;
 
-      this.drawChart(this.startDate, this.endDate);
+      this.drawChart(this.startDate);
+
 
     })
 
@@ -194,7 +180,7 @@ export class ChartDrawer {
 
   }
 
-  init(callbackOnSuccess) {
+  init(callbackOnLogout) {
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -203,13 +189,15 @@ export class ChartDrawer {
     const todayStr = `${yyyy}-${mm}-${dd}`; // đúng định dạng yyyy-mm-dd
 
     document.getElementById("startDate").value = todayStr;
-    document.getElementById("endDate").value = todayStr;
+    this.startDate = todayStr;
+  
 
-    this.drawChart(this.startDate, this.endDate);
-    this.logout(callbackOnSuccess);
+    this.drawChart(this.startDate);
+    this.logout(callbackOnLogout);
 
     this.filter();
     this.onClickPoint();
-    this.interval = setInterval(() => this.drawChart(this.startDate, this.endDate), 30000);
+    this.interval = setInterval(() => this.drawChart(this.startDate), 30000);
+
   }
 }

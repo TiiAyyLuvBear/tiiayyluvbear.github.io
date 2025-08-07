@@ -11,94 +11,16 @@
     </div>
   </header>
 
-  <h1>⚙️ Cấu hình Thông báo Push</h1>
-  <div id="statusMessage" class="status-message"></div>
+  <main style="font-size: 28px; text-align: center; margin: auto;">
+    <h2>Nhận thông báo từ hệ thống</h2>
+    <p>Vui lòng tải ứng dụng Pushsafer trên điện thoại, sau đó quét mã QR hoặc nhập key dưới đây nhận thông báo.</p>
 
-  <!-- Pushsafer API Configuration -->
-  <div class="settings-section">
-    <h3>🔑 Cấu hình Pushsafer API</h3>
-    <div class="form-group">
-      <label for="pushsaferKey">Private Key:</label>
-      <input type="password" id="pushsaferKey" placeholder="Nhập Private Key từ Pushsafer">
-      <small>Lấy Private Key từ <a href="https://www.pushsafer.com" target="_blank">pushsafer.com</a></small>
+    <div style="margin: 2rem auto;">
+      <img src="./assets/pushsaferqr.png" alt="Pushsafer QR Code" style="width: 300px; height: 300px;" />
     </div>
-    <button class="btn btn-primary" onclick="savePushsaferKey()">💾 Lưu Key</button>
-    <button class="btn btn-secondary" onclick="testNotification()">🔔 Test Notification</button>
-  </div>
 
-  <!-- Notification Toggle -->
-  <div class="settings-section">
-    <h3>🔔 Bật/Tắt Thông báo</h3>
-    <div class="form-group">
-      <label>
-        <span>Thông báo nhiệt độ:</span> 
-        <label class="toggle-switch">
-          <input type="checkbox" id="tempNotification">
-          <span class="slider"></span>
-        </label>
-      </label>
-    </div>
-    <div class="form-group">
-      <label>
-        <span>Thông báo ánh sáng:</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="lightNotification">
-          <span class="slider"></span>
-        </label>
-      </label>
-    </div>
-    <div class="form-group">
-      <label>
-        <span>Thông báo chuyển động:</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="motionNotification">
-          <span class="slider"></span>
-        </label>
-      </label>
-    </div>
-  </div>
+    <p style="font-size: 28px"><strong>Pushsafer Key:</strong> <span id="pushsafer-key">fwpIonzslkM78HojeUVARj</span></p>
 
-  <!-- Sound Settings -->
-  <div class="settings-section">
-    <h3>🔊 Cài đặt Âm thanh</h3>
-    <div class="form-group">
-      <label for="tempSound">Âm thanh nhiệt độ:</label>
-      <select id="tempSound">
-        <option value="1">Default</option>
-        <option value="8">Notification</option>
-        <option value="11" selected>Alarm</option>
-        <option value="15">Alert</option>
-        <option value="22">Emergency</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="lightSound">Âm thanh ánh sáng:</label>
-      <select id="lightSound">
-        <option value="1">Default</option>
-        <option value="8" selected>Notification</option>
-        <option value="11">Alarm</option>
-        <option value="15">Alert</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="motionSound">Âm thanh chuyển động:</label>
-      <select id="motionSound">
-        <option value="1">Default</option>
-        <option value="8">Notification</option>
-        <option value="11">Alarm</option>
-        <option value="15" selected>Alert</option>
-        <option value="22">Emergency</option>
-      </select>
-    </div>
-    <button class="btn btn-primary" onclick="saveSoundSettings()">💾 Lưu Âm thanh</button>
-  </div>
-
-  <!-- Import/Export Settings -->
-  <div class="settings-section">
-    <h3>📁 Sao lưu & Khôi phục</h3>
-    <button class="btn btn-secondary" onclick="exportSettings()">📤 Xuất cấu hình</button>
-    <button class="btn btn-secondary" onclick="importSettings()">📥 Nhập cấu hình</button>
-    <button class="btn btn-danger" onclick="resetSettings()">🔄 Đặt lại mặc định</button>
-    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImportFile(event)">
-  </div>
+    <p><a href="https://www.pushsafer.com/en/apps" target="_blank">Tải ứng dụng Pushsafer</a></p>
+  </main>
 </div>

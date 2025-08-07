@@ -2,11 +2,13 @@ import { Auth } from './auth.js';
 import { Dashboard } from './dashboard.js';
 import { ChartDrawer } from './chart.js';
 import { NotificationConfig } from './notification-config.js';
+import { PushsaferNotifier } from './pushsafer.js';
 
 const auth = new Auth();
 const dashboard = new Dashboard();
 const chart = new ChartDrawer();
 const notificationConfig = new NotificationConfig(); // Assuming this is defined in your project
+const pushsaferNotifier = new PushsaferNotifier();
 
 class App {
   constructor() {
@@ -40,6 +42,9 @@ class App {
         dashboard.logUserActivity?.("navigation", "Xem cài đặt thông báo");
       });
     }
+    document.getElementById("testNotificationBtn").addEventListener("click", () => {
+    pushsaferNotifier.testNotification();
+});
 
     // const btnDashboard = document.getElementById('dashBoardBtn');
     // if (btnDashboard) {

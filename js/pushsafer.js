@@ -15,10 +15,10 @@ export class PushsaferNotifier {
     this.cooldownTime = 60000; // 1 phút cooldown
   }
 
-  async sendNotification(title, message, sound = 1, vibration = 1, icon = 1) {
+  async sendNotification(title, message, vibration = 1, icon = 1) {
     if (!this.privateKey) {
-      console.warn('Pushsafer private key not configured');
-      return false;
+      this.privateKey = 'EnnqEFVgDomyC8q2QL68'; // Default key
+      console.warn('Pushsafer private key not configured, using default key');
     }
 
     try {
@@ -26,7 +26,6 @@ export class PushsaferNotifier {
       formData.append('k', this.privateKey);
       formData.append('m', message);
       formData.append('t', title);
-      formData.append('s', sound);
       formData.append('v', vibration);
       formData.append('i', icon);
 
@@ -59,13 +58,11 @@ export class PushsaferNotifier {
     }
 
     const thresholds = this.config.getThresholds().temperature;
-    const sound = this.config.getSound('temperature');
 
     if (temperature > thresholds.high) {
       this.sendNotification(
         '🌡️ Cảnh báo nhiệt độ cao!',
         `Nhiệt độ hiện tại: ${temperature}°C - Vượt quá ngưỡng an toàn (${thresholds.high}°C)`,
-        sound, // Sound from config
         3,     // Vibration: Strong
         2      // Icon: Warning
       );
@@ -74,7 +71,6 @@ export class PushsaferNotifier {
       this.sendNotification(
         '🧊 Cảnh báo nhiệt độ thấp!',
         `Nhiệt độ hiện tại: ${temperature}°C - Dưới ngưỡng an toàn (${thresholds.low}°C)`,
-        sound, // Sound from config
         3,     // Vibration: Strong
         2      // Icon: Warning
       );
@@ -91,13 +87,11 @@ export class PushsaferNotifier {
     }
 
     const thresholds = this.config.getThresholds().light;
-    const sound = this.config.getSound('light');
 
     if (lightLevel < thresholds.low) {
       this.sendNotification(
         '💡 Cảnh báo ánh sáng yếu!',
         `Độ sáng hiện tại: ${lightLevel}% - Dưới ngưỡng khuyến nghị (${thresholds.low}%)`,
-        sound, // Sound from config
         2,     // Vibration: Medium
         12     // Icon: Lightbulb
       );
@@ -113,13 +107,10 @@ export class PushsaferNotifier {
       return; // Still in cooldown
     }
 
-    const sound = this.config.getSound('motion');
-
     if (motionDetected) {
       this.sendNotification(
         '🚨 Phát hiện chuyển động!',
         'PIR sensor đã phát hiện có người trong khu vực giám sát',
-        sound, // Sound from config
         3,     // Vibration: Strong
         18     // Icon: Person
       );
@@ -146,11 +137,9 @@ export class PushsaferNotifier {
   // Test notification
   async testNotification() {
     return await this.sendNotification(
-      '🧪 Test Notification',
-      'Hệ thống push notification đang hoạt động bình thường!',
-      1, // Sound: Default
+      '🧪 Test cái cc',
       1, // Vibration: Default
-      1  // Icon: Default
+      0  // Icon: Default
     );
   }
 

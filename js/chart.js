@@ -21,6 +21,11 @@ export class ChartDrawer {
       const snapshot = await get(logRef);
       if (!snapshot.exists()) {
         console.warn(`Không có dữ liệu cho ngày ${startDate}`);
+        if (this.chartInstance) {
+          this.chartInstance.destroy();
+        }
+        alert(`Không có dữ liệu cho ngày ${startDate}`);
+
         return;
       }
 
@@ -179,6 +184,8 @@ export class ChartDrawer {
     };
 
   }
+
+  
 
   init(callbackOnLogout) {
 

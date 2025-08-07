@@ -402,7 +402,7 @@ export class Dashboard {
     document.getElementById("tempBox").innerHTML = `Nhiệt độ: ${this.temperature} °C`;
     document.getElementById("humiBox").innerHTML = `Độ ẩm: ${this.humidity} °%`;
     document.getElementById("lightBox").innerHTML = `Độ sáng: ${this.light} °%`;
-    document.getElementById("motionBox").innerHTML = `Độ sáng: ${this.motion}`;
+    document.getElementById("motionBox").innerHTML = `Trạng thái: ${this.motion}`;
     this.connect();
     this.logout(callbackOnLogout);
     this.fanControlSetting();

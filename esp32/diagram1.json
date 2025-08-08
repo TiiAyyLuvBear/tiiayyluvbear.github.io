@@ -1,0 +1,513 @@
+{
+    "version": 1,
+    "author": "Uri Shaked",
+    "editor": "wokwi",
+    "parts": [
+        {
+            "type": "wokwi-breadboard",
+            "id": "bb1",
+            "top": -118.2,
+            "left": -544.4,
+            "attrs": {}
+        },
+        {
+            "type": "board-esp32-devkit-c-v4",
+            "id": "esp",
+            "top": 123.14,
+            "left": -303.5,
+            "rotate": 90,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-dht22",
+            "id": "dht1",
+            "top": -114.9,
+            "left": -427.8,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-photoresistor-sensor",
+            "id": "ldr1",
+            "top": -115.5,
+            "left": -562.3,
+            "rotate": 90,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-buzzer",
+            "id": "bz1",
+            "top": -84,
+            "left": -238.2,
+            "attrs": {
+                "volume": "0.1"
+            }
+        },
+        {
+            "type": "wokwi-lcd1602",
+            "id": "lcd1",
+            "top": 73.6,
+            "left": 178.4,
+            "attrs": {
+                "pins": "i2c"
+            }
+        },
+        {
+            "type": "wokwi-pir-motion-sensor",
+            "id": "pir1",
+            "top": -92,
+            "left": -362.58,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-led",
+            "id": "led2",
+            "top": -80.4,
+            "left": -169,
+            "attrs": {
+                "color": "red"
+            }
+        },
+        {
+            "type": "wokwi-resistor",
+            "id": "r2",
+            "top": -4.8,
+            "left": -182.95,
+            "rotate": 90,
+            "attrs": {
+                "value": "220"
+            }
+        },
+        {
+            "type": "wokwi-relay-module",
+            "id": "relay1",
+            "top": -93,
+            "left": -130.8,
+            "rotate": 270,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-relay-module",
+            "id": "relay2",
+            "top": -93,
+            "left": -73.2,
+            "rotate": 270,
+            "attrs": {}
+        }
+    ],
+    "connections": [
+        [
+            "esp:TX",
+            "$serialMonitor:RX",
+            "",
+            []
+        ],
+        [
+            "esp:RX",
+            "$serialMonitor:TX",
+            "",
+            []
+        ],
+        [
+            "bb1:bp.1",
+            "esp:5V",
+            "red",
+            [
+                "v-0.9",
+                "h-68",
+                "v115.05"
+            ]
+        ],
+        [
+            "esp:32",
+            "lcd1:SDA",
+            "#8f4814",
+            [
+                "v-57.45",
+                "h412.8"
+            ]
+        ],
+        [
+            "esp:33",
+            "lcd1:SCL",
+            "orange",
+            [
+                "v-47.85",
+                "h152.46",
+                "v-0.3"
+            ]
+        ],
+        [
+            "pir1:VCC",
+            "bb1:bp.16",
+            "red",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "pir1:GND",
+            "bb1:bn.18",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "esp:5",
+            "bb1:22b.g",
+            "limegreen",
+            [
+                "v38.4",
+                "h-105.6",
+                "v-307.2"
+            ]
+        ],
+        [
+            "bb1:6b.g",
+            "bb1:bn.4",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:7b.g",
+            "bb1:bp.5",
+            "red",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:33b.g",
+            "bb1:bn.26",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:bn.1",
+            "esp:GND.1",
+            "black",
+            [
+                "v56.3",
+                "h200.8"
+            ]
+        ],
+        [
+            "bb1:39b.j",
+            "bb1:bn.31",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:40t.e",
+            "esp:16",
+            "violet",
+            [
+                "v172.8",
+                "h-412.8",
+                "v201.6",
+                "h278.4"
+            ]
+        ],
+        [
+            "bb1:15b.g",
+            "bb1:bn.11",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:13b.g",
+            "esp:4",
+            "blue",
+            [
+                "v288",
+                "h115.2"
+            ]
+        ],
+        [
+            "bb1:12b.g",
+            "bb1:bp.9",
+            "red",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:bn.50",
+            "lcd1:GND",
+            "black",
+            [
+                "v27.5",
+                "h124"
+            ]
+        ],
+        [
+            "bb1:47b.g",
+            "bb1:bp.38",
+            "red",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:48b.g",
+            "bb1:bn.39",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:4b.g",
+            "esp:34",
+            "limegreen",
+            [
+                "v86.4",
+                "h278.4"
+            ]
+        ],
+        [
+            "bb1:34b.g",
+            "esp:14",
+            "orange",
+            [
+                "v105.6",
+                "h-76.8"
+            ]
+        ],
+        [
+            "bb1:53b.g",
+            "bb1:bp.43",
+            "red",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:54b.g",
+            "bb1:bn.44",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "bb1:55b.g",
+            "esp:19",
+            "cyan",
+            [
+                "v297.6",
+                "h-240"
+            ]
+        ],
+        [
+            "bb1:49b.g",
+            "esp:18",
+            "cyan",
+            [
+                "v288",
+                "h-192"
+            ]
+        ],
+        [
+            "bb1:bp.50",
+            "lcd1:VCC",
+            "red",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "dht1:VCC",
+            "bb1:12b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "dht1:SDA",
+            "bb1:13b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "dht1:NC",
+            "bb1:14b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "dht1:GND",
+            "bb1:15b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "ldr1:VCC",
+            "bb1:7b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "ldr1:GND",
+            "bb1:6b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "ldr1:DO",
+            "bb1:5b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "ldr1:AO",
+            "bb1:4b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "bz1:1",
+            "bb1:33b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "bz1:2",
+            "bb1:34b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "pir1:VCC",
+            "bb1:21b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "pir1:OUT",
+            "bb1:22b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "pir1:GND",
+            "bb1:23b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "led2:A",
+            "bb1:40t.d",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "led2:C",
+            "bb1:39t.d",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "r2:1",
+            "bb1:39t.e",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "r2:2",
+            "bb1:39b.i",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "relay1:VCC",
+            "bb1:47b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "relay1:GND",
+            "bb1:48b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "relay1:IN",
+            "bb1:49b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "relay2:VCC",
+            "bb1:53b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "relay2:GND",
+            "bb1:54b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ],
+        [
+            "relay2:IN",
+            "bb1:55b.f",
+            "",
+            [
+                "$bb"
+            ]
+        ]
+    ],
+    "dependencies": {}
+}

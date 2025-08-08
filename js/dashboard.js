@@ -2,8 +2,40 @@ import { auth, app } from './auth.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { PushsaferNotifier } from './pushsafer.js';
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
-
 const db = getDatabase(app);
+
+
+function logUserAction(action, details = {}) {
+  const user = auth.currentUser;
+  if (!user || !user.email) {
+    console.error("Chưa đăng nhập hoặc không có email");
+    return;
+  }
+
+  // Lấy phần trước dấu chấm cuối cùng (bỏ .com, .vn, ...)
+  const email = user.email;
+  const lastDotIndex = email.lastIndexOf(".");
+  const emailPrefix = lastDotIndex !== -1 ? email.substring(0, lastDotIndex) : email;
+
+  // Ngày và giờ
+  const now = new Date();
+  const dateStr = now.toISOString().split("T")[0]; // yyyy-mm-dd
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  const timeStr = `${hh}:${mm}:${ss}`;
+
+  const logRef = ref(db, `history/${emailPrefix}/${dateStr}`);
+  const logEntry = {
+    action,
+    details,
+    timestamp: `${dateStr} ${timeStr}`
+  };
+
+  push(logRef, logEntry)
+    .then(() => console.log("✅ Lưu lịch sử thành công:", action))
+    .catch((err) => console.error("❌ Lỗi lưu lịch sử:", err));
+}
 
 export class Dashboard {
   constructor() {

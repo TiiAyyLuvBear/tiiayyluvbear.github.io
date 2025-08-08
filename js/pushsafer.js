@@ -136,11 +136,7 @@ export class PushsaferNotifier {
 
   // Test notification
   async testNotification() {
-    return await this.sendNotification(
-      '🧪 Test cái cc',
-      1, // Vibration: Default
-      0  // Icon: Default
-    );
+  return await this.sendNotification('🧪 Test notification', 'Đây là thông báo thử nghiệm');
   }
 
   // Get configuration interface

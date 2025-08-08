@@ -26,25 +26,32 @@ class App {
       dashboard.init(() => this.handleLogout());
     });
 
-    const btnStatistics = document.getElementById('chartBtn');
-    if (btnStatistics) {
-      btnStatistics.addEventListener('click', () => {
+    // Delegate clicks so elements can be added later (tabs are loaded asynchronously)
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      // Go to Chart tab
+      if (target.id === 'chartBtn') {
         this.showTab('chart');
-        chart.init(() => this.handleLogout());  // Vẽ biểu đồ
-        // Log navigation event
-        dashboard.logUserActivity?.("navigation", "Xem trang thống kê");
-      });
-    }
-    const btnNotificationSettings = document.getElementById('notificationBtn');
-    if (btnNotificationSettings) {
-      btnNotificationSettings.addEventListener('click', () => {
+        chart.init(() => this.handleLogout());
+        if (dashboard.logUserActivity) dashboard.logUserActivity('navigation', 'Xem trang thống kê');
+        return;
+      }
+
+      // Go to Notification Settings tab
+      if (target.id === 'notificationBtn') {
         this.showTab('notification');
-        dashboard.logUserActivity?.("navigation", "Xem cài đặt thông báo");
-      });
-    }
-    document.getElementById("testNotificationBtn").addEventListener("click", () => {
-    pushsaferNotifier.testNotification();
-});
+        if (dashboard.logUserActivity) dashboard.logUserActivity('navigation', 'Xem cài đặt thông báo');
+        return;
+      }
+
+      // Test Push notification
+      if (target.id === 'testNotificationBtn') {
+        pushsaferNotifier.testNotification();
+        return;
+      }
+    });
 
     // const btnDashboard = document.getElementById('dashBoardBtn');
     // if (btnDashboard) {
@@ -55,11 +62,11 @@ class App {
     // }
     
     //Cái này t sửa để dùng chung nút quay về dashboard
-    document.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
       // Nút quay về Dashboard
       if (e.target && e.target.id === 'dashBoardBtn') {
         this.showTab('dashboard');
-        dashboard.logUserActivity?.("navigation", "Quay về trang chính");
+        if (dashboard.logUserActivity) dashboard.logUserActivity('navigation', 'Quay về trang chính');
       }
 
       // Nút đăng xuất (dùng chung cho mọi tab)

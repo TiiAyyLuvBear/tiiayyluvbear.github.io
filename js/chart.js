@@ -53,7 +53,8 @@ export class ChartDrawer {
         return;
       }
 
-      const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d");
+  // Chart is provided via CDN in index.html as global
 
       if (this.chartInstance) {
         this.chartInstance.destroy();
@@ -201,7 +202,17 @@ export class ChartDrawer {
 
     document.getElementById("startDate").value = todayStr;
     this.startDate = todayStr;
+  
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+      console.error("Chưa đăng nhập hoặc không có email");
+      return;
+    }
+    const email = user.email;
+    const lastIndex = email.lastIndexOf("@");
+    const emailPrefix = lastIndex !== -1 ? email.substring(0, lastIndex) : email;
 
+    document.getElementById("usernameDisplay2").innerHTML = `${emailPrefix}`;
 
     this.drawChart(this.startDate);
     this.logout(callbackOnLogout);

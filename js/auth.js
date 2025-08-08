@@ -57,6 +57,7 @@ export function logUserAction(action, details = {}) {
 export class Auth {
   constructor() {
     this.auth = auth;
+    this.email = 0;
   }
 
   onAuthStateChanged(callback) {
@@ -70,6 +71,7 @@ export class Auth {
       const email = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
+      this.email = email;
       signInWithEmailAndPassword(this.auth, email, password)
         .then(() => {
           logUserAction("login", "Đăng nhập thành công");

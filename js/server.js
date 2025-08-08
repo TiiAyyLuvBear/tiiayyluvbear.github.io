@@ -29,7 +29,7 @@ app.post('/send-report', (req, res) => {
     // Gửi ngay 1 lần
     sendReport(currentEmail);
 
-    // Gửi định kỳ mỗi 1 giờ
+    // Gửi định kỳ mỗi 1 phút
     reportInterval = setInterval(() => {
         sendReport(currentEmail);
     }, 60 * 1000);
@@ -38,6 +38,6 @@ app.post('/send-report', (req, res) => {
     res.json({ success: true, message: `Đã đặt lịch gửi báo cáo định kỳ tới ${currentEmail}` });
 });
 
-// app.listen(3000, () => {
-//     console.log('🚀 Server chạy tại http://localhost:3000');
-// });
+app.listen(3000, () => {
+    console.log('🚀 Server chạy tại http://localhost:3000');
+});

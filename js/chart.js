@@ -1,6 +1,6 @@
 import { getDatabase, ref, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { auth } from "./auth.js";
+import { auth, logUserAction } from "./auth.js";
 
 export class ChartDrawer {
   constructor() {
@@ -146,15 +146,15 @@ export class ChartDrawer {
     filterer.addEventListener("click", (event) => {
       event.preventDefault()
       const startDate = document.getElementById("startDate").value;
-     
-     
+
+
       if (!startDate) {
         alert("Thiếu ngày bắt đầu hoặc ngày kết thúc!!");
         return;
       }
 
       this.startDate = startDate;
-
+      logUserAction("filter_chart", "Lọc dữ liệu theo ngày: " + startDate);
       this.drawChart(this.startDate);
 
 
@@ -189,7 +189,7 @@ export class ChartDrawer {
 
   }
 
-  
+
 
   init(callbackOnLogout) {
 
@@ -201,7 +201,7 @@ export class ChartDrawer {
 
     document.getElementById("startDate").value = todayStr;
     this.startDate = todayStr;
-  
+
 
     this.drawChart(this.startDate);
     this.logout(callbackOnLogout);

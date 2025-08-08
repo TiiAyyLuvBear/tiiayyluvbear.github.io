@@ -16,9 +16,43 @@ const firebaseConfig = {
   appId: "1:640016475258:web:d6ad2609d1aa128e4d87c3",
   databaseURL: "https://login-5637d-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+const db = getDatabase(app);
+
+export function logUserAction(action, details = {}) {
+  const user = auth.currentUser;
+  if (!user || !user.email) {
+    console.error("Chưa đăng nhập hoặc không có email");
+    return;
+  }
+
+  // Lấy phần trước dấu chấm cuối cùng (bỏ .com, .vn, ...)
+  const email = user.email;
+  const lastDotIndex = email.lastIndexOf(".");
+  const emailPrefix = lastDotIndex !== -1 ? email.substring(0, lastDotIndex) : email;
+
+  // Ngày và giờ
+  const now = new Date();
+  const dateStr = now.toISOString().split("T")[0]; // yyyy-mm-dd
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  const timeStr = `${hh}:${mm}:${ss}`;
+
+  const logRef = ref(db, `history/${emailPrefix}/${dateStr}`);
+  const logEntry = {
+    action,
+    details,
+    timestamp: `${dateStr} ${timeStr}`
+  };
+
+  push(logRef, logEntry)
+    .then(() => console.log("✅ Lưu lịch sử thành công:", action))
+    .catch((err) => console.error("❌ Lỗi lưu lịch sử:", err));
+}
 
 export class Auth {
   constructor() {
@@ -37,7 +71,10 @@ export class Auth {
       const password = document.getElementById("password").value;
 
       signInWithEmailAndPassword(this.auth, email, password)
-        .then(() => callbackOnSuccess())
+        .then(() => {
+          logUserAction("login", "Đăng nhập thành công");
+          callbackOnSuccess();
+        })
         .catch((error) => {
           console.error(error);
           alert("Tên đăng nhập hoặc mật khẩu không đúng");
@@ -85,6 +122,7 @@ export class Auth {
 
   logout(callbackOnSuccess) {
     signOut(this.auth).then(() => {
+      // logUserAction("logout", "Đăng xuất thành cxông");
       console.log("Signed out from Firebase");
       callbackOnSuccess();
     });

@@ -1,41 +1,8 @@
-import { auth, app } from './auth.js';
+import { auth, app, logUserAction } from './auth.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { PushsaferNotifier } from './pushsafer.js';
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
-const db = getDatabase(app);
 
-
-function logUserAction(action, details = {}) {
-  const user = auth.currentUser;
-  if (!user || !user.email) {
-    console.error("Chưa đăng nhập hoặc không có email");
-    return;
-  }
-
-  // Lấy phần trước dấu chấm cuối cùng (bỏ .com, .vn, ...)
-  const email = user.email;
-  const lastDotIndex = email.lastIndexOf(".");
-  const emailPrefix = lastDotIndex !== -1 ? email.substring(0, lastDotIndex) : email;
-
-  // Ngày và giờ
-  const now = new Date();
-  const dateStr = now.toISOString().split("T")[0]; // yyyy-mm-dd
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
-  const timeStr = `${hh}:${mm}:${ss}`;
-
-  const logRef = ref(db, `history/${emailPrefix}/${dateStr}`);
-  const logEntry = {
-    action,
-    details,
-    timestamp: `${dateStr} ${timeStr}`
-  };
-
-  push(logRef, logEntry)
-    .then(() => console.log("✅ Lưu lịch sử thành công:", action))
-    .catch((err) => console.error("❌ Lỗi lưu lịch sử:", err));
-}
 
 export class Dashboard {
   constructor() {
@@ -105,11 +72,6 @@ export class Dashboard {
         if (motionBox) {
           motionBox.innerHTML = `👤 Trạng thái: ${motionValue === 1 ? 'Có người' : 'Không có người'}`;
         }
-
-        // Gửi thông báo nếu có chuyển động
-        // if (motionValue === 1) {
-        //   this.pushNotifier.checkAndNotifyMotion(true);
-        // }
 
         // Lưu vào cache để đẩy Firebase
         this.cache.motion = motionValue;
@@ -254,10 +216,6 @@ export class Dashboard {
     fanOn?.addEventListener("input", () => {
       fanOnValue.textContent = fanOn.value;
       this.fanOn = parseFloat(fanOn.value);
-
-      // Lưu lịch sử thay đổi ngưỡng quạt bật
-      // logUserAction("fan_threshold_change", `fanOn: ${this.fanOn}°C `);
-
       // Update temperature threshold for notifications
       this.pushNotifier.updateThresholds({
         temperature: { high: parseInt(fanOn.value), low: 10 }
@@ -267,9 +225,6 @@ export class Dashboard {
     fanOff?.addEventListener("input", () => {
       fanOffValue.textContent = fanOff.value;
       this.fanOff = parseFloat(fanOff.value);
-
-      // Lưu lịch sử thay đổi ngưỡng quạt tắt
-      // logUserAction("fan_threshold_change", `fanOff: ${this.fanOff}°C `);
 
       // Update light threshold for notifications
       this.pushNotifier.updateThresholds({
@@ -312,9 +267,6 @@ export class Dashboard {
       lightOnValue.textContent = lightOn.value;
       this.lightOn = parseFloat(lightOn.value);
 
-      // Lưu lịch sử thay đổi ngưỡng đèn bật
-      // logUserAction("light_threshold_change", `lightOn: ${this.lightOn}% `);
-
       // Update temperature threshold for notifications
       this.pushNotifier.updateThresholds({
         temperature: { high: parseInt(fanOn.value), low: 10 }
@@ -324,9 +276,6 @@ export class Dashboard {
     lightOff?.addEventListener("input", () => {
       lightOffValue.textContent = lightOff.value;
       this.lightOff = parseFloat(lightOff.value);
-
-      // Lưu lịch sử thay đổi ngưỡng đèn tắt
-      // logUserAction("light_threshold_change", `lightOff: ${this.lightOff}%`);
 
       // Update light threshold for notifications
       this.pushNotifier.updateThresholds({
@@ -388,70 +337,13 @@ export class Dashboard {
         this.client.end();
         this.client = null;
       }
-
+      logUserAction("logout", "Đăng xuất thành công");
       signOut(auth).then(() => {
-        // Lưu lịch sử logout
-        logUserAction("user_logout", "dashboard_session_ended");
-
         console.log("Signed out from Firebase");
         callbackOnSuccess();
       });
     });
   }
-
-  // saveThresholdsToFirebase() {
-  //   const db = getDatabase();
-  //   const user = auth.currentUser;
-
-  //   if (!user) return;
-
-  //   const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
-  //   set(thresholdsRef, {
-  //     fanOn: this.fanOn,
-  //     fanOff: this.fanOff,
-  //     lightOn: this.lightOn,
-  //     lightOff: this.lightOff
-  //   }).then(() => {
-  //     console.log("Thresholds saved.");
-  //   }).catch((error) => {
-  //     console.error("Failed to save thresholds:", error);
-  //   });
-  // }
-
-  // loadThresholdsFromFirebase() {
-  //   const db = getDatabase();
-  //   const user = auth.currentUser;
-
-  //   if (!user) return;
-
-  //   const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
-  //   get(thresholdsRef).then((snapshot) => {
-  //     if (snapshot.exists()) {
-  //       const data = snapshot.val();
-  //       this.fanOn = data.fanOn ?? this.fanOn;
-  //       this.fanOff = data.fanOff ?? this.fanOff;
-  //       this.lightOn = data.lightOn ?? this.lightOn;
-  //       this.lightOff = data.lightOff ?? this.lightOff;
-
-  //       // Update giao diện nếu cần
-  //       // document.getElementById("fanOn")?.value = this.fanOn;
-  //       // document.getElementById("fanOff")?.value = this.fanOff;
-  //       // document.getElementById("lightOn")?.value = this.lightOn;
-  //       // document.getElementById("lightOff")?.value = this.lightOff;
-
-  //       // document.getElementById("fanOnValue").textContent = this.fanOn;
-  //       // document.getElementById("fanOffValue").textContent = this.fanOff;
-  //       // document.getElementById("lightOnValue").textContent = this.lightOn;
-  //       // document.getElementById("lightOffValue").textContent = this.lightOff;
-
-  //       console.log("Thresholds loaded.");
-  //     } else {
-  //       console.log("No thresholds set.");
-  //     }
-  //   }).catch((error) => {
-  //     console.error("Failed to load thresholds:", error);
-  //   });
-  // }
 
   init(callbackOnLogout) {
     // Lưu lịch sử đăng nhập và khởi tạo dashboard
@@ -467,35 +359,6 @@ export class Dashboard {
     this.manualControl(); // Thêm điều khiển thủ công
     //this.addTestNotificationButton();
   }
-
-  // addTestNotificationButton() {
-  //   // Tạo nút test notification nếu chưa có
-  //   if (!document.getElementById("testNotificationBtn")) {
-  //     const testBtn = document.createElement("button");
-  //     testBtn.id = "testNotificationBtn";
-  //     testBtn.className = "control-btn";
-  //     testBtn.innerHTML = "🔔 Test Notification";
-  //     testBtn.style.marginTop = "10px";
-
-  //     testBtn.addEventListener("click", async () => {
-  //       testBtn.disabled = true;
-  //       testBtn.innerHTML = "⏳ Đang gửi...";
-
-  //       const success = await this.pushNotifier.testNotification();
-
-  //       testBtn.disabled = false;
-  //       testBtn.innerHTML = success ? "✅ Đã gửi!" : "❌ Lỗi";
-
-  //       setTimeout(() => {
-  //         testBtn.innerHTML = "🔔 Test Notification";
-  //       }, 2000);
-  //     });
-
-  //     // Thêm vào container thích hợp
-  //     const container = document.querySelector(".dashboard-container") || document.body;
-  //     container.appendChild(testBtn);
-  //   }
-  // }
 }
 // Lấy phần tử
 document.addEventListener("DOMContentLoaded", () => {
@@ -528,7 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem('notifyEmail', email);
 
     try {
-      const res = await fetch("https://render-web-3dgs.onrender.com/send-report", { // đổi sang URL server thật
+      //local server
+      const res = await fetch("http://localhost:3000/send-report", { // đổi sang URL server thật
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })

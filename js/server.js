@@ -1,20 +1,43 @@
 require('dotenv').config();
 const express = require('express');
-const path = require('path');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { sendReport } = require('./send_report');
+
 const app = express();
-const port = process.env.PORT || 3000;
+app.use(cors());
+app.use(bodyParser.json());
 
-// Chạy ngầm script gửi báo cáo
-require('./send_report');
+let currentEmail = null;
+let reportInterval = null;
 
-// Phục vụ các file trong thư mục gốc (nơi có index.html)
-app.use(express.static(path.join(__dirname, '..')));
+// API nhận email từ dashboard
+app.post('/send-report', (req, res) => {
+    const { email } = req.body;
 
-// Trả về index.html khi truy cập /
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
+    if (!email || !email.includes('@')) {
+        return res.status(400).json({ success: false, error: "Email không hợp lệ" });
+    }
+
+    currentEmail = email;
+
+    // Clear interval cũ
+    if (reportInterval) {
+        clearInterval(reportInterval);
+    }
+
+    // Gửi ngay 1 lần
+    sendReport(currentEmail);
+
+    // Gửi định kỳ mỗi 1 giờ
+    reportInterval = setInterval(() => {
+        sendReport(currentEmail);
+    }, 60 * 1000);
+
+    console.log(`📌 Đã đặt lịch gửi báo cáo định kỳ tới ${currentEmail}`);
+    res.json({ success: true, message: `Đã đặt lịch gửi báo cáo định kỳ tới ${currentEmail}` });
 });
 
-app.listen(port, () => {
-    console.log(`🌐 Server đang chạy tại http://localhost:${port}`);
+app.listen(3000, () => {
+    console.log('🚀 Server chạy tại http://localhost:3000');
 });

@@ -8,10 +8,11 @@
     <div class="right-header">
       <button>admin</button>
       <button id="logoutBtn">Đăng xuất</button>
-      <span class="icon">🔔</span>
+      <!-- Icon mở popup -->
+      <span class="icon" id="notificationIcon">🔔</span>
     </div>
   </header>
-  
+
   <div class="container">
     <div class="column">
       <h2>Trạng thái hiện tại</h2>
@@ -24,18 +25,14 @@
     </div>
     <div class="column">
       <h2>Điều khiển </h2>
-      <!-- <div class="control-actions">
-        <button class="control-btn openThresholdBtn">⚙️</button>
-      </div> -->
       <div class="control-box">
         <div>🌀 Quạt</div>
         <label class="toggle-switch">
           <input type="checkbox" id="fanSwitch">
           <span class="slider"></span>
         </label>
-        <!-- <div class="toggle-switch on" id="fanSwitch"></div> -->
         <div class="control-actions">
-         <button class="control-btn fanOpenThresholdBtn">⚙️</button>
+          <button class="control-btn fanOpenThresholdBtn">⚙️</button>
         </div>
       </div>
       <div class="control-box">
@@ -43,8 +40,7 @@
         <label class="toggle-switch">
           <input type="checkbox" id="lightSwitch">
           <span class="slider"></span>
-        </label>        
-        <!-- <div class="toggle-switch" id="lightSwitch"></div> -->
+        </label>
         <div class="control-actions">
           <button class="control-btn lightOpenThresholdBtn">⚙️</button>
         </div>
@@ -59,11 +55,9 @@
       </div>
     </div>
   </div>
-
-
-
 </div>
 
+<!-- Popup điều chỉnh quạt -->
 <div id="fanThresholdOverlay">
   <div class="popup">
     <h3>Điều chỉnh ngưỡng</h3>
@@ -81,6 +75,7 @@
   </div>
 </div>
 
+<!-- Popup điều chỉnh đèn -->
 <div id="lightThresholdOverlay">
   <div class="popup">
     <h3>Điều chỉnh ngưỡng</h3>
@@ -95,5 +90,16 @@
       <span id="lightOffValue">50</span>%
     </label>
     <button id="closePopup2">Đóng</button>
+  </div>
+</div>
+
+<!-- Popup nhập email -->
+<div id="emailPopup">
+  <div class="popup-content">
+    <h3>Nhập email nhận báo cáo</h3>
+    <input type="email" id="emailInput" placeholder="example@gmail.com">
+    <br><br>
+    <button id="saveEmailBtn">Lưu</button>
+    <button id="cancelEmailBtn">Hủy</button>
   </div>
 </div>

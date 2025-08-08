@@ -399,110 +399,66 @@ export class Dashboard {
     });
   }
 
-  // controlSetting() {
+  // saveThresholdsToFirebase() {
+  //   const db = getDatabase();
+  //   const user = auth.currentUser;
 
-  //   const overlay = document.getElementById("thresholdOverlay");
-  //   const dashboard = document.getElementById("dashboard");
-  //   const fanInput = document.getElementById("fanThreshold");
-  //   const fanValue = document.getElementById("fanValue");
-  //   const lightInput = document.getElementById("lightThreshold");
-  //   const lightValue = document.getElementById("lightValue");
-  //   const closePopupBtn = document.getElementById("closePopup");
+  //   if (!user) return;
 
-  //   const controlBtns = document.querySelectorAll(".control-btn.openThresholdBtn");
-  //   controlBtns.forEach(btn => {
-  //     btn.addEventListener("click", () => {
-  //       overlay.classList.add("active");
-  //       dashboard?.classList.add("blurred");
-  //     });
-  //   });
-
-  //   closePopupBtn?.addEventListener("click", () => {
-  //     overlay.classList.remove("active");
-  //     dashboard?.classList.remove("blurred");
-  //   });
-
-  //   lightOn?.addEventListener("input", () => {
-  //     lightOnValue.textContent = lightOn.value;
-  //     this.lightOn = parseFloat(lightOn.value);
-  //     // Update temperature threshold for notifications
-  //     this.pushNotifier.updateThresholds({
-  //       temperature: { high: parseInt(fanOn.value), low: 10 }
-  //     });
-  //   });
-
-  //   lightOff?.addEventListener("input", () => {
-  //     lightOffValue.textContent = lightOff.value;
-  //     this.lightOff = parseFloat(lightOff.value);
-  //     // Update light threshold for notifications
-  //     this.pushNotifier.updateThresholds({
-  //       light: { low: parseInt(fanOff.value) }
-  //     });
+  //   const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
+  //   set(thresholdsRef, {
+  //     fanOn: this.fanOn,
+  //     fanOff: this.fanOff,
+  //     lightOn: this.lightOn,
+  //     lightOff: this.lightOff
+  //   }).then(() => {
+  //     console.log("Thresholds saved.");
+  //   }).catch((error) => {
+  //     console.error("Failed to save thresholds:", error);
   //   });
   // }
 
-  saveThresholdsToFirebase() {
-    const db = getDatabase();
-    const user = auth.currentUser;
+  // loadThresholdsFromFirebase() {
+  //   const db = getDatabase();
+  //   const user = auth.currentUser;
 
-    if (!user) return;
+  //   if (!user) return;
 
-    const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
-    set(thresholdsRef, {
-      fanOn: this.fanOn,
-      fanOff: this.fanOff,
-      lightOn: this.lightOn,
-      lightOff: this.lightOff
-    }).then(() => {
-      console.log("Thresholds saved.");
-    }).catch((error) => {
-      console.error("Failed to save thresholds:", error);
-    });
-  }
+  //   const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
+  //   get(thresholdsRef).then((snapshot) => {
+  //     if (snapshot.exists()) {
+  //       const data = snapshot.val();
+  //       this.fanOn = data.fanOn ?? this.fanOn;
+  //       this.fanOff = data.fanOff ?? this.fanOff;
+  //       this.lightOn = data.lightOn ?? this.lightOn;
+  //       this.lightOff = data.lightOff ?? this.lightOff;
 
-  loadThresholdsFromFirebase() {
-    const db = getDatabase();
-    const user = auth.currentUser;
+  //       // Update giao diện nếu cần
+  //       // document.getElementById("fanOn")?.value = this.fanOn;
+  //       // document.getElementById("fanOff")?.value = this.fanOff;
+  //       // document.getElementById("lightOn")?.value = this.lightOn;
+  //       // document.getElementById("lightOff")?.value = this.lightOff;
 
-    if (!user) return;
+  //       // document.getElementById("fanOnValue").textContent = this.fanOn;
+  //       // document.getElementById("fanOffValue").textContent = this.fanOff;
+  //       // document.getElementById("lightOnValue").textContent = this.lightOn;
+  //       // document.getElementById("lightOffValue").textContent = this.lightOff;
 
-    const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
-    get(thresholdsRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        this.fanOn = data.fanOn ?? this.fanOn;
-        this.fanOff = data.fanOff ?? this.fanOff;
-        this.lightOn = data.lightOn ?? this.lightOn;
-        this.lightOff = data.lightOff ?? this.lightOff;
-
-        // Update giao diện nếu cần
-        // document.getElementById("fanOn")?.value = this.fanOn;
-        // document.getElementById("fanOff")?.value = this.fanOff;
-        // document.getElementById("lightOn")?.value = this.lightOn;
-        // document.getElementById("lightOff")?.value = this.lightOff;
-
-        // document.getElementById("fanOnValue").textContent = this.fanOn;
-        // document.getElementById("fanOffValue").textContent = this.fanOff;
-        // document.getElementById("lightOnValue").textContent = this.lightOn;
-        // document.getElementById("lightOffValue").textContent = this.lightOff;
-
-        console.log("Thresholds loaded.");
-      } else {
-        console.log("No thresholds set.");
-      }
-    }).catch((error) => {
-      console.error("Failed to load thresholds:", error);
-    });
-  }
-
-
+  //       console.log("Thresholds loaded.");
+  //     } else {
+  //       console.log("No thresholds set.");
+  //     }
+  //   }).catch((error) => {
+  //     console.error("Failed to load thresholds:", error);
+  //   });
+  // }
 
   init(callbackOnLogout) {
     // Lưu lịch sử đăng nhập và khởi tạo dashboard
 
     document.getElementById("tempBox").innerHTML = ` 🌡️ Nhiệt độ: ${this.temperature} °C`;
-    document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${this.humidity} °%`;
-    document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${this.light} °%`;
+    document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${this.humidity} %`;
+    document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${this.light} %`;
     document.getElementById("motionBox").innerHTML = `👤 Trạng thái: ${this.motion}`;
     this.connect();
     this.logout(callbackOnLogout);
@@ -541,3 +497,57 @@ export class Dashboard {
   //   }
   // }
 }
+// Lấy phần tử
+const notificationIcon = document.getElementById('notificationIcon');
+const emailPopup = document.getElementById('emailPopup');
+const saveEmailBtn = document.getElementById('saveEmailBtn');
+const cancelEmailBtn = document.getElementById('cancelEmailBtn');
+const emailInput = document.getElementById('emailInput');
+
+// Mở popup khi click icon
+notificationIcon.addEventListener('click', () => {
+  emailPopup.style.display = 'block';
+  const savedEmail = localStorage.getItem('notifyEmail');
+  if (savedEmail) {
+    emailInput.value = savedEmail;
+  }
+});
+
+// Đóng popup
+cancelEmailBtn.addEventListener('click', () => {
+  emailPopup.style.display = 'none';
+});
+
+// Lưu email + gửi server
+saveEmailBtn.addEventListener('click', async () => {
+  const email = emailInput.value.trim();
+
+  if (email === '' || !email.includes('@')) {
+    alert('Vui lòng nhập email hợp lệ');
+    return;
+  }
+
+  // Lưu vào localStorage
+  localStorage.setItem('notifyEmail', email);
+
+  try {
+    // Gửi email lên server Node.js
+    const res = await fetch("http://localhost:3000/send-report", { // <-- đổi sang URL đầy đủ
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ " + data.message);
+    } else {
+      alert("❌ " + (data.error || "Lỗi không xác định"));
+    }
+  } catch (err) {
+    alert("❌ Lỗi khi gửi yêu cầu");
+    console.error(err);
+  }
+
+  emailPopup.style.display = 'none';
+});

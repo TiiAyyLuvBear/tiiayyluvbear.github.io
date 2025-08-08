@@ -532,7 +532,7 @@ saveEmailBtn.addEventListener('click', async () => {
 
   try {
     // Gửi email lên server Node.js
-    const res = await fetch("http://localhost:3000/send-report", { // <-- đổi sang URL đầy đủ
+    const res = await fetch("/send-report", { // <-- đổi sang URL đầy đủ
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email })

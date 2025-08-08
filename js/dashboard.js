@@ -498,56 +498,53 @@ export class Dashboard {
   // }
 }
 // Lấy phần tử
-const notificationIcon = document.getElementById('notificationIcon');
-const emailPopup = document.getElementById('emailPopup');
-const saveEmailBtn = document.getElementById('saveEmailBtn');
-const cancelEmailBtn = document.getElementById('cancelEmailBtn');
-const emailInput = document.getElementById('emailInput');
+document.addEventListener("DOMContentLoaded", () => {
+  const notificationIcon = document.getElementById('notificationIcon');
+  const emailPopup = document.getElementById('emailPopup');
+  const saveEmailBtn = document.getElementById('saveEmailBtn');
+  const cancelEmailBtn = document.getElementById('cancelEmailBtn');
+  const emailInput = document.getElementById('emailInput');
 
-// Mở popup khi click icon
-notificationIcon.addEventListener('click', () => {
-  emailPopup.style.display = 'block';
-  const savedEmail = localStorage.getItem('notifyEmail');
-  if (savedEmail) {
-    emailInput.value = savedEmail;
-  }
-});
-
-// Đóng popup
-cancelEmailBtn.addEventListener('click', () => {
-  emailPopup.style.display = 'none';
-});
-
-// Lưu email + gửi server
-saveEmailBtn.addEventListener('click', async () => {
-  const email = emailInput.value.trim();
-
-  if (email === '' || !email.includes('@')) {
-    alert('Vui lòng nhập email hợp lệ');
-    return;
-  }
-
-  // Lưu vào localStorage
-  localStorage.setItem('notifyEmail', email);
-
-  try {
-    // Gửi email lên server Node.js
-    const res = await fetch("/send-report", { // <-- đổi sang URL đầy đủ
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      alert("✅ " + data.message);
-    } else {
-      alert("❌ " + (data.error || "Lỗi không xác định"));
+  notificationIcon.addEventListener('click', () => {
+    emailPopup.style.display = 'block';
+    const savedEmail = localStorage.getItem('notifyEmail');
+    if (savedEmail) {
+      emailInput.value = savedEmail;
     }
-  } catch (err) {
-    alert("❌ Lỗi khi gửi yêu cầu");
-    console.error(err);
-  }
+  });
 
-  emailPopup.style.display = 'none';
+  cancelEmailBtn.addEventListener('click', () => {
+    emailPopup.style.display = 'none';
+  });
+
+  saveEmailBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+
+    if (email === '' || !email.includes('@')) {
+      alert('Vui lòng nhập email hợp lệ');
+      return;
+    }
+
+    localStorage.setItem('notifyEmail', email);
+
+    try {
+      const res = await fetch("https://render-web-3dgs.onrender.com/send-report", { // đổi sang URL server thật
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert("✅ " + data.message);
+      } else {
+        alert("❌ " + (data.error || "Lỗi không xác định"));
+      }
+    } catch (err) {
+      alert("❌ Lỗi khi gửi yêu cầu");
+      console.error(err);
+    }
+
+    emailPopup.style.display = 'none';
+  });
 });

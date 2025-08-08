@@ -3,6 +3,7 @@
 #include <DHT.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <Firebase_ESP_Client.h>
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -54,6 +55,7 @@ void mqttConnect()
       mqttClient.subscribe("23127263/esp32/motion");
       mqttClient.subscribe("23127263/esp32/control/fan");
       mqttClient.subscribe("23127263/esp32/control/lamp");
+      mqttClient.subscribe("23127263/esp32/control/buzzer");
     }
     else
     {
@@ -193,5 +195,24 @@ void loop()
     lcd.print(hum);
 
     // delay(1000);
+    // int thresholdTempMax, thresholdTempMin, thresholdLight;
+
+    // void getThresholdsFromFirebase() {
+    //   if (Firebase.RTDB.getInt(&fbdo, "thresholds/temperatureMax")) {
+    //     thresholdTempMax = fbdo.intData();
+    //   }
+    //   if (Firebase.RTDB.getInt(&fbdo, "thresholds/temperatureMin")) {
+    //     thresholdTempMin = fbdo.intData();
+    //   }
+    //   if (Firebase.RTDB.getInt(&fbdo, "thresholds/lightMin")) {
+    //     thresholdLight = fbdo.intData();
+    //   }
+    // }
+
+    // if (temp > thresholdTempMax || temp < thresholdTempMin || ldrValue < thresholdLight) {
+    //   digitalWrite(buzzerPin, HIGH);
+    //   delay(1000);
+    //   digitalWrite(buzzerPin, LOW);
+    // }
   }
 }

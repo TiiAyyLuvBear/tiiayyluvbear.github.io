@@ -40,6 +40,7 @@ export class Dashboard {
       this.client.subscribe("23127263/esp32/motion");
       this.client.subscribe("23127263/esp32/control/fan");
       this.client.subscribe("23127263/esp32/control/lamp");
+      this.client.subscribe("23127263/esp32/control/buzzer");
     });
 
     this.client.on("message", (topic, message) => {
@@ -49,8 +50,17 @@ export class Dashboard {
         const temp = parseInt(value);
         this.temperature = temp;
         document.getElementById("tempBox").innerHTML = `🌡️ Nhiệt độ: ${value} °C`;
-        // this.pushNotifier.checkAndNotifyTemperature(temp);
+        this.pushNotifier.checkAndNotifyTemperature(temp);
         this.cache.temperature = temp;
+        // Kiểm tra và gửi lệnh bật/tắt buzzer nếu vượt ngưỡng nhiệt độ
+        if (this.fanOn && temp >= this.fanOn) {
+          this.client?.publish("23127263/esp32/control/buzzer", "on");
+          console.log("🔔 Buzzer ON (nhiệt độ cao)");
+        } else if (this.fanOff && temp <= this.fanOff) {
+          this.client?.publish("23127263/esp32/control/buzzer", "on");
+          console.log("🔔 Buzzer ON (nhiệt độ thấp)");
+        }
+
       }
 
       if (key === "humidity") {
@@ -62,9 +72,14 @@ export class Dashboard {
       if (key === "light") {
         const light = parseInt(value);
         this.light = light;
-  document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${value} %`;
-        //this.pushNotifier.checkAndNotifyLight(light);
+        document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${value} %`;
+        this.pushNotifier.checkAndNotifyLight(light);
         this.cache.light = light;
+        // Kiểm tra và gửi lệnh bật/tắt buzzer nếu vượt ngưỡng ánh sáng
+        if (this.lightOn && light <= this.lightOn) {
+          this.client?.publish("23127263/esp32/control/buzzer", "on");
+          console.log("🔔 Buzzer ON (ánh sáng thấp)");
+        }
       }
 
       if (key === "motion") {

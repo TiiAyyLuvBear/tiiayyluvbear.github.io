@@ -15,7 +15,7 @@ export class PushsaferNotifier {
     this.cooldownTime = 60000; // 1 phút cooldown
   }
 
-  async sendNotification(title, message, vibration = 1, icon = 1) {
+  async sendNotification(title, message, vibration = 1, icon = 1, sound = '') {
     if (!this.privateKey) {
       this.privateKey = 'YyS1c3Dl4NN20ckONcl5'; // Default key
       console.warn('Pushsafer private key not configured, using default key');
@@ -28,6 +28,9 @@ export class PushsaferNotifier {
       formData.append('t', title);
       formData.append('v', vibration);
       formData.append('i', icon);
+      if (sound) {
+        formData.append('s', sound);
+      }
 
       const response = await fetch(this.apiUrl, {
         method: 'POST',
@@ -58,13 +61,15 @@ export class PushsaferNotifier {
     }
 
     const thresholds = this.config.getThresholds().temperature;
+    const sound = this.config.getSounds().temperature;
 
     if (temperature > thresholds.high) {
       this.sendNotification(
         '🌡️ Cảnh báo nhiệt độ cao!',
         `Nhiệt độ hiện tại: ${temperature}°C - Vượt quá ngưỡng an toàn (${thresholds.high}°C)`,
         3,     // Vibration: Strong
-        2      // Icon: Warning
+        2,     // Icon: Warning
+        sound  // Sound: Alarm
       );
       this.lastNotificationTime.temperature = now;
     } else if (temperature < thresholds.low) {
@@ -72,7 +77,8 @@ export class PushsaferNotifier {
         '🧊 Cảnh báo nhiệt độ thấp!',
         `Nhiệt độ hiện tại: ${temperature}°C - Dưới ngưỡng an toàn (${thresholds.low}°C)`,
         3,     // Vibration: Strong
-        2      // Icon: Warning
+        2,     // Icon: Warning
+        sound  // Sound: Alarm
       );
       this.lastNotificationTime.temperature = now;
     }
@@ -87,13 +93,15 @@ export class PushsaferNotifier {
     }
 
     const thresholds = this.config.getThresholds().light;
+    const sound = this.config.getSounds().light;
 
     if (lightLevel < thresholds.low) {
       this.sendNotification(
         '💡 Cảnh báo ánh sáng yếu!',
         `Độ sáng hiện tại: ${lightLevel}% - Dưới ngưỡng khuyến nghị (${thresholds.low}%)`,
         2,     // Vibration: Medium
-        12     // Icon: Lightbulb
+        12,    // Icon: Lightbulb
+        sound  // Sound: Notification
       );
       this.lastNotificationTime.light = now;
     }
@@ -107,12 +115,15 @@ export class PushsaferNotifier {
       return; // Still in cooldown
     }
 
+    const sound = this.config.getSounds().motion;
+
     if (motionDetected) {
       this.sendNotification(
         '🚨 Phát hiện chuyển động!',
         'PIR sensor đã phát hiện có người trong khu vực giám sát',
         3,     // Vibration: Strong
-        18     // Icon: Person
+        18,    // Icon: Person
+        sound  // Sound: Alert
       );
       this.lastNotificationTime.motion = now;
     }

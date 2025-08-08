@@ -3,6 +3,8 @@ import { Dashboard } from './dashboard.js';
 import { ChartDrawer } from './chart.js';
 import { NotificationConfig } from './notification-config.js';
 import { PushsaferNotifier } from './pushsafer.js';
+import { startMonitoring } from './notification-monitor.js';
+
 
 const auth = new Auth();
 const dashboard = new Dashboard();
@@ -98,7 +100,5 @@ class App {
     });
   }
 }
-
+startMonitoring();
 const app = new App();
-
-

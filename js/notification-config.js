@@ -2,7 +2,7 @@ export class NotificationConfig {
   constructor() {
     this.storageKey = 'iot_notification_config';
     this.defaultConfig = {
-      pushsaferKey: 'EnnqEFVgDomyC8q2QL68',
+      pushsaferKey: 'YyS1c3Dl4NN20ckONcl5',
       thresholds: {
         temperature: {
           high: 35,

@@ -83,7 +83,6 @@ export class Auth {
         });
     });
   }
-
   setupSignup() {
     const showSignupBtn = document.getElementById("signupBtn");
     const submitSignupBtn = document.getElementById("submitSignupBtn");

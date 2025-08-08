@@ -1,3 +1,4 @@
+Private key ltanh23: YyS1c3Dl4NN20ckONcl5
 # Hướng dẫn Setup Push Notification với Pushsafer
 
 ## 1. Đăng ký tài khoản Pushsafer

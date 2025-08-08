@@ -7,12 +7,10 @@ export class ChartDrawer {
     this.db = getDatabase();
     this.interval = null;
     this.startDate = null;
+    this.noDataAlerted = false; // <--- Cờ để tránh alert nhiều lần
   }
 
-
-
   async drawChart(startDate) {
-
     const database = `sensor/${startDate}`;
     console.log(database);
     const logRef = query(ref(this.db, database), limitToLast(20));
@@ -21,25 +19,32 @@ export class ChartDrawer {
       const snapshot = await get(logRef);
       if (!snapshot.exists()) {
         console.warn(`Không có dữ liệu cho ngày ${startDate}`);
+
+        // Chỉ alert nếu chưa cảnh báo trước đó
+        if (!this.noDataAlerted) {
+          alert(`Không có dữ liệu cho ngày ${startDate}`);
+          this.noDataAlerted = true;
+        }
+
         if (this.chartInstance) {
           this.chartInstance.destroy();
         }
-        alert(`Không có dữ liệu cho ngày ${startDate}`);
 
         return;
       }
+
+      // Nếu có dữ liệu → reset lại cờ cảnh báo
+      this.noDataAlerted = false;
 
       const data = snapshot.val();
       const labels = [], temps = [], light = [], humid = [];
 
       Object.values(data).forEach(entry => {
-
-
-          entry.time = new Date(entry.time).toLocaleTimeString();
-          labels.push(entry.time);
-          light.push(entry.light);
-          temps.push(entry.temperature);
-          humid.push(entry.humidity);
+        entry.time = new Date(entry.time).toLocaleTimeString();
+        labels.push(entry.time);
+        light.push(entry.light);
+        temps.push(entry.temperature);
+        humid.push(entry.humidity);
       });
 
       const canvas = document.getElementById("tempChart");
@@ -50,7 +55,6 @@ export class ChartDrawer {
 
       const ctx = canvas.getContext("2d");
 
-      // Hủy biểu đồ cũ nếu có
       if (this.chartInstance) {
         this.chartInstance.destroy();
       }
@@ -77,7 +81,6 @@ export class ChartDrawer {
               tension: 0.3
             },
             {
-              label: "Ánh sáng (%)",
               label: "Ánh sáng (%)",
               data: light,
               borderColor: "orange",
@@ -119,6 +122,7 @@ export class ChartDrawer {
       console.error("Lỗi khi đọc dữ liệu từ Firebase:", error);
     }
   }
+
 
   logout(callbackOnSuccess) {
     const logoutBtn = document.getElementById("logoutBtn2");
@@ -201,8 +205,8 @@ export class ChartDrawer {
 
     this.drawChart(this.startDate);
     this.logout(callbackOnLogout);
-
     this.filter();
+
     this.onClickPoint();
     this.interval = setInterval(() => this.drawChart(this.startDate), 30000);
 

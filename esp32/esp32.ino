@@ -3,7 +3,6 @@
 #include <DHT.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <Firebase_ESP_Client.h>
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -78,13 +77,18 @@ void callback(char *topic, byte *message, unsigned int length)
   {
     if (msg == "on")
     {
-  digitalWrite(RELAY_FAN, HIGH);
-      Serial.println("fan on");
+      digitalWrite(RELAY_FAN, HIGH);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Fan on");
+
     }
     else
     {
-  digitalWrite(RELAY_FAN, LOW);
-      Serial.println("fan off");
+      digitalWrite(RELAY_FAN, LOW);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Fan off");
     }
   }
 
@@ -92,37 +96,37 @@ void callback(char *topic, byte *message, unsigned int length)
   {
     if (msg == "on")
     {
-  digitalWrite(RELAY_LIGHT, HIGH);
-      Serial.println("light on");
+      digitalWrite(RELAY_LIGHT, HIGH);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Light on");
     }
     else
     {
       digitalWrite(RELAY_LIGHT, LOW);
-      Serial.println("light off");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Light off");
     }
   }
 
   if (String(topic) == "23127263/esp32/threshold/fanOn")
   {
-    Serial.println(msg.toInt());
     thresholdTempMax = msg.toInt();
   }
 
   if (String(topic) == "23127263/esp32/threshold/fanOff")
   {
-    Serial.println(msg.toInt());
     thresholdTempMin = msg.toInt();
   }
 
   if (String(topic) == "23127263/esp32/threshold/lightOn")
   {
-    Serial.println(msg.toInt());
     thresholdLightMin = msg.toInt();
   }
 
   if (String(topic) == "23127263/esp32/threshold/lightOff")
   {
-    Serial.println(msg.toInt());
     thresholdLightMax = msg.toInt();
   }
 }
@@ -226,12 +230,22 @@ void loop()
     lcd.print("Humidity:");
     lcd.print(hum);
 
-    if (temp >= thresholdTempMax) tone(BUZZER_PIN, 1000, 500);
-    if (temp < thresholdTempMin) tone(BUZZER_PIN, 1000, 500);
-    if (temp >= thresholdLightMax) tone(BUZZER_PIN, 1000, 500);
-    if (temp < thresholdLightMin) tone(BUZZER_PIN, 1000, 500);
+    delay(2000);
 
-    // Gọi hàm để tránh kêu nhiều quá phiền
-    // checkBuzzer(temp, lightPercent);
+    if (temp >= thresholdTempMax) {
+      tone(BUZZER_PIN, 1000, 500);
+    }
+    if (temp < thresholdTempMin) {
+      tone(BUZZER_PIN, 1000, 500);
+    }
+
+    if (lightPercent >= thresholdLightMax){
+      tone(BUZZER_PIN, 1000, 500);
+
+    }
+    if (lightPercent < thresholdLightMin) {
+      tone(BUZZER_PIN, 1000, 500);
+    }
+
   }
 }

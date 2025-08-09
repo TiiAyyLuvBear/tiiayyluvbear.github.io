@@ -10,7 +10,7 @@ export class Dashboard {
     this.temperature = 0;
     this.humidity = 0;
     this.light = 0;
-    this.motion = null;
+    this.motion = 'Không có người';
     this.cache = {};
     this.autoMode = false;
     this.fanOn = 0;
@@ -80,7 +80,7 @@ export class Dashboard {
 
       if (key === "motion") {
         const motionValue = parseInt(value);
-        this.motion = motionValue;
+        this.motion = motionValue ? 'Có người' : 'Không có người';
         const motionBox = document.getElementById("motionBox");
         if (motionBox) motionBox.innerHTML = `👤 Trạng thái: ${motionValue === 1 ? 'Có người' : 'Không có người'}`;
         this.cache.motion = motionValue;
@@ -341,7 +341,7 @@ export class Dashboard {
         localStorage.setItem('notifyEmail', email);
 
         try {
-          const serverUrl = "http://192.168.74.19:5000";
+          const serverUrl = "http://localhost:5000";
           const res = await fetch(`${serverUrl}/send-report`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -409,9 +409,9 @@ export class Dashboard {
 
         const defaults = {
           fanOn: 30,
-          fanOff: 20,
-          lightOn: 30,
-          lightOff: 70
+          fanOff: 15,
+          lightOn: 35,
+          lightOff: 75
         };
         this.fanOn = defaults.fanOn;
         this.fanOff = defaults.fanOff;

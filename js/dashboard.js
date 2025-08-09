@@ -1,8 +1,7 @@
 import { auth, app, logUserAction } from './auth.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { PushsaferNotifier } from './pushsafer.js';
-import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
-
+import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 export class Dashboard {
   constructor() {
@@ -40,7 +39,8 @@ export class Dashboard {
 
     this.client.on("message", (topic, message) => {
       const value = message.toString();
-      const key = topic.split("/").pop();  // "temperature", "humidity", ...
+      const key = topic.split("/").pop();
+
       if (key === "temperature") {
         const temp = parseInt(value);
         this.temperature = temp;
@@ -59,9 +59,10 @@ export class Dashboard {
       }
 
       if (key === "humidity") {
-        this.humidity = parseInt(value);
+        const hum = parseInt(value);
+        this.humidity = hum;
         document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${value} %`;
-        this.cache.humidity = parseInt(value);
+        this.cache.humidity = hum;
       }
 
       if (key === "light") {
@@ -78,28 +79,18 @@ export class Dashboard {
       }
 
       if (key === "motion") {
-        const motionValue = parseInt(value);  // sẽ luôn là 1 hoặc 0 nếu ESP32 gửi đúng
-
-        this.motion = motionValue;  // dùng cho autoControl
-
-        // Hiển thị ra giao diện
+        const motionValue = parseInt(value);
+        this.motion = motionValue;
         const motionBox = document.getElementById("motionBox");
-        if (motionBox) {
-          motionBox.innerHTML = `👤 Trạng thái: ${motionValue === 1 ? 'Có người' : 'Không có người'}`;
-        }
-
-        // Lưu vào cache để đẩy Firebase
+        if (motionBox) motionBox.innerHTML = `👤 Trạng thái: ${motionValue === 1 ? 'Có người' : 'Không có người'}`;
         this.cache.motion = motionValue;
-
       }
 
-
-      //Gửi Firebase nếu đủ dữ liệu
+      // Push to Firebase when a full set is collected
       if (this.cache.temperature !== undefined &&
-        this.cache.humidity !== undefined &&
-        this.cache.light !== undefined &&
-        this.cache.motion !== undefined) {
-
+          this.cache.humidity !== undefined &&
+          this.cache.light !== undefined &&
+          this.cache.motion !== undefined) {
         const now = new Date();
         const pad = (n) => n.toString().padStart(2, '0');
         const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
@@ -118,22 +109,18 @@ export class Dashboard {
         // Ghi duy nhất vào nhánh /sensor/yyyy-mm-dd/
         const logRef = ref(getDatabase(), `/sensor/${dateStr}/`);
         push(logRef, payload)
-          .then(() => {
-            console.log("✅ Dữ liệu đã được lưu vào Firebase:", payload);
-          })
-          .catch((error) => {
-            console.error("❌ Lỗi khi lưu dữ liệu vào Firebase:", error);
-          });
+          .then(() => console.log("✅ Dữ liệu đã được lưu vào Firebase:", payload))
+          .catch((error) => console.error("❌ Lỗi khi lưu dữ liệu vào Firebase:", error));
 
-        // Reset lại cache
         this.cache = {};
       }
     });
 
-
+    // Auto control loop
     setInterval(() => {
       if (!this.autoMode) return;
-      // ======= NO MOTION: TURN OFF EVERYTHING =======
+
+      // If no motion, turn everything off
       if (this.motion === 0 || this.motion === null) {
         if (this.currentFanState !== "off") {
           this.client?.publish("23127263/esp32/control/fan", "off");
@@ -141,71 +128,61 @@ export class Dashboard {
           if (fanEl) fanEl.checked = false;
           this.currentFanState = "off";
           logUserAction("fan_control", "auto_control: off");
-          console.log("Fan Off (No Motion)");
         }
-
         if (this.currentLampState !== "off") {
           this.client?.publish("23127263/esp32/control/lamp", "off");
           const lightEl = document.getElementById("lightSwitch");
           if (lightEl) lightEl.checked = false;
           this.currentLampState = "off";
           logUserAction("lamp_control", "auto_control: off");
-          console.log("Light Off (No Motion)");
         }
-
-        return; // không tiếp tục kiểm tra nhiệt độ/ánh sáng nếu không có người
+        return;
       }
-      // ======= FAN CONTROL =======
+
+      // Fan control
       if (this.temperature >= this.fanOn && this.currentFanState !== "on") {
         this.client?.publish("23127263/esp32/control/fan", "on");
         const fanEl2 = document.getElementById("fanSwitch");
         if (fanEl2) fanEl2.checked = true;
         this.currentFanState = "on";
         logUserAction("fan_control", "auto_control: on");
-        console.log("Fan On");
       } else if (this.temperature <= this.fanOff && this.currentFanState !== "off") {
         this.client?.publish("23127263/esp32/control/fan", "off");
         const fanEl3 = document.getElementById("fanSwitch");
         if (fanEl3) fanEl3.checked = false;
         this.currentFanState = "off";
         logUserAction("fan_control", "auto_control: off");
-        console.log("Fan Off");
       }
 
-      // ======= LAMP CONTROL =======
+      // Lamp control
       if (this.light <= this.lightOn && this.currentLampState !== "on") {
         this.client?.publish("23127263/esp32/control/lamp", "on");
         const lightEl2 = document.getElementById("lightSwitch");
         if (lightEl2) lightEl2.checked = true;
         this.currentLampState = "on";
         logUserAction("lamp_control", "auto_control: on");
-        console.log("Light On");
       } else if (this.light >= this.lightOff && this.currentLampState !== "off") {
         this.client?.publish("23127263/esp32/control/lamp", "off");
         const lightEl3 = document.getElementById("lightSwitch");
         if (lightEl3) lightEl3.checked = false;
         this.currentLampState = "off";
         logUserAction("lamp_control", "auto_control: off");
-        console.log("Light Off");
       }
-
     }, 5000);
 
     this.autoControl();
-
   }
 
   autoControl() {
     const autoSwitch = document.getElementById("autoBtn");
-
     autoSwitch?.addEventListener("change", () => {
       this.autoMode = autoSwitch.checked;
       logUserAction("auto_control", this.autoMode ? "on" : "off");
       console.log("Tự động:", this.autoMode);
     });
   }
-  fanControlSetting() {
 
+  fanControlSetting() {
     const overlay = document.getElementById("fanThresholdOverlay");
     const dashboard = document.getElementById("dashboard");
     const fanOn = document.getElementById("fanOn");
@@ -219,8 +196,6 @@ export class Dashboard {
       btn.addEventListener("click", () => {
         overlay.classList.add("active");
         dashboard?.classList.add("blurred");
-
-        // Lưu lịch sử mở popup cài đặt ngưỡng quạt
         logUserAction("fan_threshold_popup", "opened");
       });
     });
@@ -228,16 +203,16 @@ export class Dashboard {
     closePopupBtn?.addEventListener("click", () => {
       overlay.classList.remove("active");
       dashboard?.classList.remove("blurred");
-
-      // Lưu lịch sử đóng popup cài đặt ngưỡng quạt
       logUserAction("fan_threshold_popup", "closed");
-      logUserAction("fan_threshold_popup", `fanOn:` + this.fanOn + `°C, fanOff: ` + this.fanOff + `°C`);
+      logUserAction("fan_threshold_popup", `fanOn: ${this.fanOn}°C, fanOff: ${this.fanOff}°C`);
+      this.saveThresholdsToFirebase();
+      this.client?.publish("23127263/esp32/threshold/fanOn", String(this.fanOn));
+      this.client?.publish("23127263/esp32/threshold/fanOff", String(this.fanOff));
     });
 
     fanOn?.addEventListener("input", () => {
       fanOnValue.textContent = fanOn.value;
       this.fanOn = parseFloat(fanOn.value);
-      // Update temperature threshold for notifications
       this.pushNotifier.updateThresholds({
         temperature: { ...this.pushNotifier.getConfig().getThresholds().temperature, high: parseInt(fanOn.value) }
       });
@@ -246,15 +221,13 @@ export class Dashboard {
     fanOff?.addEventListener("input", () => {
       fanOffValue.textContent = fanOff.value;
       this.fanOff = parseFloat(fanOff.value);
-
-      // Update light threshold for notifications
-      // fanOff is unrelated to light; don't mix thresholds
-      // Keep for completeness if needed later
     });
+
+    // Initialize sliders with current state
+    this.syncThresholdUI();
   }
 
   lightControlSetting() {
-
     const overlay = document.getElementById("lightThresholdOverlay");
     const dashboard = document.getElementById("dashboard");
     const lightOn = document.getElementById("lightOn");
@@ -268,8 +241,6 @@ export class Dashboard {
       btn.addEventListener("click", () => {
         overlay.classList.add("active");
         dashboard?.classList.add("blurred");
-
-        // Lưu lịch sử mở popup cài đặt ngưỡng đèn
         logUserAction("light_threshold_popup", "opened");
       });
     });
@@ -277,18 +248,16 @@ export class Dashboard {
     closePopupBtn?.addEventListener("click", () => {
       overlay.classList.remove("active");
       dashboard?.classList.remove("blurred");
-
-      // Lưu lịch sử đóng popup cài đặt ngưỡng đèn
-      logUserAction("light_threshold_popup", 'lighOn: ' + this.lightOn + ', lightOff: ' + this.lightOff);
+      logUserAction("light_threshold_popup", `lightOn: ${this.lightOn}, lightOff: ${this.lightOff}`);
       logUserAction("light_threshold_popup", "closed");
+      this.saveThresholdsToFirebase();
+      this.client?.publish("23127263/esp32/threshold/lightOn", String(this.lightnOn));
+      this.client?.publish("23127263/esp32/threshold/lightOff", String(this.lightOff));
     });
 
     lightOn?.addEventListener("input", () => {
       lightOnValue.textContent = lightOn.value;
       this.lightOn = parseFloat(lightOn.value);
-
-      // Update temperature threshold for notifications
-      // Update light low threshold for notifications (assuming light low means turn on when too dark)
       this.pushNotifier.updateThresholds({
         light: { ...this.pushNotifier.getConfig().getThresholds().light, low: parseInt(lightOn.value) }
       });
@@ -297,28 +266,21 @@ export class Dashboard {
     lightOff?.addEventListener("input", () => {
       lightOffValue.textContent = lightOff.value;
       this.lightOff = parseFloat(lightOff.value);
-
-      // Update light threshold for notifications
-      // Optional: could manage a high threshold for light if needed
     });
+
+    // Initialize sliders with current state
+    this.syncThresholdUI();
   }
 
-  // Thêm chức năng điều khiển thủ công đèn/quạt
   manualControl() {
     const fanToggle = document.getElementById("fanSwitch");
     if (fanToggle) {
       fanToggle.addEventListener("click", () => {
-        // Lấy trạng thái hiện tại của nút dựa trên thuộc tính checked
         const newState = fanToggle.checked ? "on" : "off";
-
-        // Gửi tín hiệu điều khiển lên ESP32 qua MQTT
         this.client?.publish("23127263/esp32/control/fan", newState);
         logUserAction("fan_control", "manual_control: " + newState);
-
-        // Cập nhật lại giao diện
         fanToggle.checked = (newState === "on");
-        this.currentFanState = newState; // Lưu trạng thái
-        console.log(`Fan ${newState === "on" ? "On" : "Off"} (Manual Control)`);
+        this.currentFanState = newState;
       });
     }
 
@@ -326,20 +288,13 @@ export class Dashboard {
     if (lightToggle) {
       lightToggle.addEventListener("click", () => {
         const newState = lightToggle.checked ? "on" : "off";
-
         this.client?.publish("23127263/esp32/control/lamp", newState);
         logUserAction("lamp_control", "manual_control: " + newState);
-
-
         lightToggle.checked = (newState === "on");
         this.currentLampState = newState;
-        console.log(`Light ${newState === "on" ? "On" : "Off"} (Manual Control)`);
       });
     }
   }
-
-
-
 
   logout(callbackOnSuccess) {
     const logoutBtn = document.getElementById("logoutBtn");
@@ -354,15 +309,120 @@ export class Dashboard {
       }
       logUserAction("logout", "Đăng xuất thành công");
       signOut(auth).then(() => {
-        console.log("Signed out from Firebase");
         callbackOnSuccess();
       });
     });
   }
 
-  init(callbackOnLogout) {
-    // Lưu lịch sử đăng nhập và khởi tạo dashboard
+  setupEmailReportPopup(){
+    const notificationIcon = document.getElementById('notificationIcon');
+    const emailPopup = document.getElementById('emailPopup');
+    const saveEmailBtn = document.getElementById('saveEmailBtn');
+    const cancelEmailBtn = document.getElementById('cancelEmailBtn');
+    const emailInput = document.getElementById('emailInput');
 
+    if (!notificationIcon || !emailPopup) return;
+
+    notificationIcon.addEventListener('click', () => {
+      emailPopup.style.display = 'block';
+      const savedEmail = localStorage.getItem('notifyEmail');
+      if (savedEmail) emailInput.value = savedEmail;
+    });
+
+    cancelEmailBtn?.addEventListener('click', () => {
+      emailPopup.style.display = 'none';
+    });
+
+    saveEmailBtn?.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+
+      if (email === '' || !email.includes('@')) {
+        alert('Vui lòng nhập email hợp lệ');
+        return;
+      }
+
+      localStorage.setItem('notifyEmail', email);
+
+      try {
+        const res = await fetch('http://localhost:5000/send-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert('✅ ' + data.message);
+        } else {
+          alert('❌ ' + (data.error || 'Lỗi không xác định'));
+        }
+      } catch (err) {
+        alert('❌ Lỗi khi gửi yêu cầu');
+        console.error(err);
+      }
+
+      emailPopup.style.display = 'none';
+    });
+  }
+
+  saveThresholdsToFirebase() {
+    const db = getDatabase();
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
+    set(thresholdsRef, {
+      fanOn: this.fanOn,
+      fanOff: this.fanOff,
+      lightOn: this.lightOn,
+      lightOff: this.lightOff
+    }).catch((error) => {
+      console.error("Failed to save thresholds:", error);
+    });
+  }
+
+  loadThresholdsFromFirebase() {
+    const db = getDatabase();
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    const thresholdsRef = ref(db, `users/${user.uid}/thresholds`);
+    get(thresholdsRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        this.fanOn = data.fanOn ?? this.fanOn;
+        this.fanOff = data.fanOff ?? this.fanOff;
+        this.lightOn = data.lightOn ?? this.lightOn;
+        this.lightOff = data.lightOff ?? this.lightOff;
+
+        // Sync UI with loaded thresholds
+        this.syncThresholdUI();
+      } else {
+        // No thresholds yet for this user: apply sensible defaults and persist
+        const defaults = {
+          fanOn: 30,   // turn fan ON at >= 32°C
+          fanOff: 28,  // turn fan OFF at <= 28°C
+          lightOn: 30, // turn light ON when light <= 30%
+          lightOff: 70 // turn light OFF when light >= 70%
+        };
+        this.fanOn = defaults.fanOn;
+        this.fanOff = defaults.fanOff;
+        this.lightOn = defaults.lightOn;
+        this.lightOff = defaults.lightOff;
+        // Persist defaults for the user so future refreshes load them
+        this.saveThresholdsToFirebase();
+        // Sync UI to reflect defaults immediately
+        this.syncThresholdUI();
+        console.log("Applied default thresholds for new user.");
+      }
+    }).catch((error) => {
+      console.error("Failed to load thresholds:", error);
+    });
+  }
+
+  init(callbackOnLogout) {
     document.getElementById("tempBox").innerHTML = ` 🌡️ Nhiệt độ: ${this.temperature} °C`;
     document.getElementById("humiBox").innerHTML = `💧 Độ ẩm: ${this.humidity} %`;
     document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${this.light} %`;
@@ -382,60 +442,33 @@ export class Dashboard {
 
     this.connect();
     this.logout(callbackOnLogout);
+    this.loadThresholdsFromFirebase();
     this.fanControlSetting();
     this.lightControlSetting();
     this.manualControl();
+    this.setupEmailReportPopup();
+    // Extra sync in case load returned quickly
+    this.syncThresholdUI();
   }
 }
-// Lấy phần tử
-document.addEventListener("DOMContentLoaded", () => {
-  const notificationIcon = document.getElementById('notificationIcon');
-  const emailPopup = document.getElementById('emailPopup');
-  const saveEmailBtn = document.getElementById('saveEmailBtn');
-  const cancelEmailBtn = document.getElementById('cancelEmailBtn');
-  const emailInput = document.getElementById('emailInput');
 
-  notificationIcon.addEventListener('click', () => {
-    emailPopup.style.display = 'block';
-    const savedEmail = localStorage.getItem('notifyEmail');
-    if (savedEmail) {
-      emailInput.value = savedEmail;
-    }
-  });
+// Helper method to sync internal threshold values to the UI controls
+Dashboard.prototype.syncThresholdUI = function () {
+  const fanOnInput = document.getElementById("fanOn");
+  const fanOffInput = document.getElementById("fanOff");
+  const lightOnInput = document.getElementById("lightOn");
+  const lightOffInput = document.getElementById("lightOff");
+  if (fanOnInput && this.fanOn !== undefined) fanOnInput.value = this.fanOn;
+  if (fanOffInput && this.fanOff !== undefined) fanOffInput.value = this.fanOff;
+  if (lightOnInput && this.lightOn !== undefined) lightOnInput.value = this.lightOn;
+  if (lightOffInput && this.lightOff !== undefined) lightOffInput.value = this.lightOff;
 
-  cancelEmailBtn.addEventListener('click', () => {
-    emailPopup.style.display = 'none';
-  });
-
-  saveEmailBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-
-    if (email === '' || !email.includes('@')) {
-      alert('Vui lòng nhập email hợp lệ');
-      return;
-    }
-
-    localStorage.setItem('notifyEmail', email);
-
-    try {
-      //local server
-      const res = await fetch("http://localhost:3000/send-report", { // đổi sang URL server thật
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert("✅ " + data.message);
-      } else {
-        alert("❌ " + (data.error || "Lỗi không xác định"));
-      }
-    } catch (err) {
-      alert("❌ Lỗi khi gửi yêu cầu");
-      console.error(err);
-    }
-
-    emailPopup.style.display = 'none';
-  });
-});
+  const fanOnValue = document.getElementById("fanOnValue");
+  const fanOffValue = document.getElementById("fanOffValue");
+  const lightOnValue = document.getElementById("lightOnValue");
+  const lightOffValue = document.getElementById("lightOffValue");
+  if (fanOnValue && this.fanOn !== undefined) fanOnValue.textContent = this.fanOn;
+  if (fanOffValue && this.fanOff !== undefined) fanOffValue.textContent = this.fanOff;
+  if (lightOnValue && this.lightOn !== undefined) lightOnValue.textContent = this.lightOn;
+  if (lightOffValue && this.lightOff !== undefined) lightOffValue.textContent = this.lightOff;
+};

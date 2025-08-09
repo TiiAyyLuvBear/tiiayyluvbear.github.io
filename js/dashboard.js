@@ -37,6 +37,8 @@ export class Dashboard {
       this.client.subscribe("23127263/esp32/control/buzzer");
     });
 
+
+
     this.client.on("message", (topic, message) => {
       const value = message.toString();
       const key = topic.split("/").pop();
@@ -397,13 +399,19 @@ export class Dashboard {
         this.lightOn = data.lightOn ?? this.lightOn;
         this.lightOff = data.lightOff ?? this.lightOff;
 
+        this.client?.publish("23127263/esp32/threshold/fanOn", String(this.fanOn));
+        this.client?.publish("23127263/esp32/threshold/fanOff", String(this.fanOff));
+        this.client?.publish("23127263/esp32/threshold/lightOn", String(this.lightnOn));
+        this.client?.publish("23127263/esp32/threshold/lightOff", String(this.lightOff));
+        console.log("sended");
+
         // Sync UI with loaded thresholds
         this.syncThresholdUI();
       } else {
         // No thresholds yet for this user: apply sensible defaults and persist
         const defaults = {
           fanOn: 30,   // turn fan ON at >= 32°C
-          fanOff: 28,  // turn fan OFF at <= 28°C
+          fanOff: 20,  // turn fan OFF at <= 28°C
           lightOn: 30, // turn light ON when light <= 30%
           lightOff: 70 // turn light OFF when light >= 70%
         };

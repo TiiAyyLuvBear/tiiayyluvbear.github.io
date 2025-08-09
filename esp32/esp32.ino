@@ -127,6 +127,26 @@ void callback(char *topic, byte *message, unsigned int length)
   }
 }
 
+// Hàm này để tránh kêu nhiều quá phiền
+// bool buzzerOn = false;
+
+// void checkBuzzer(int temp, int light) {
+//   bool overTemp = (thresholdTempMax > 0 && temp >= thresholdTempMax) ||
+//                   (thresholdTempMin > 0 && temp < thresholdTempMin);
+
+//   bool overLight = (thresholdLightMax > 0 && light >= thresholdLightMax) ||
+//                    (thresholdLightMin > 0 && light < thresholdLightMin);
+
+//   if ((overTemp || overLight) && !buzzerOn) {
+//     tone(BUZZER_PIN, 1000, 500);
+//     buzzerOn = true;
+//   }
+//   else if (!overTemp && !overLight) {
+//     noTone(BUZZER_PIN);
+//     buzzerOn = false;
+//   }
+// }
+
 void setup()
 {
   Serial.begin(115200);
@@ -210,5 +230,8 @@ void loop()
     if (temp < thresholdTempMin) tone(BUZZER_PIN, 1000, 500);
     if (temp >= thresholdLightMax) tone(BUZZER_PIN, 1000, 500);
     if (temp < thresholdLightMin) tone(BUZZER_PIN, 1000, 500);
+
+    // Gọi hàm để tránh kêu nhiều quá phiền
+    // checkBuzzer(temp, lightPercent);
   }
 }

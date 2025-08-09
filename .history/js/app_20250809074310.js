@@ -51,7 +51,6 @@ class App {
       // Test Push notification
       if (target.id === 'testNotificationBtn') {
         pushsaferNotifier.testNotification();
-        if (dashboard.logUserActivity) dashboard.logUserActivity('notification', 'Gửi thông báo thử nghiệm');
         return;
       }
     });
@@ -63,9 +62,9 @@ class App {
     //     mqttHandler.logUserActivity?.("navigation", "Quay về trang chính");
     //   })
     // }
-
+    
     //Cái này t sửa để dùng chung nút quay về dashboard
-    document.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
       // Nút quay về Dashboard
       if (e.target && e.target.id === 'dashBoardBtn') {
         this.showTab('dashboard');
@@ -78,7 +77,7 @@ class App {
           this.showTab('login');
         });
       }
-
+      
       if (e.target && e.target.id === 'logoutBtn2') {
         auth.logout(() => {
           this.showTab('login');
@@ -88,7 +87,7 @@ class App {
 
 
   }
-
+  
   showTab(tabId) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     const target = document.getElementById(tabId);

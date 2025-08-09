@@ -22,6 +22,11 @@ export class Dashboard {
     this.currentLampState = null;
   }
 
+  // Expose logger for other modules
+  logUserActivity(action, details) {
+    logUserAction(action, details);
+  }
+
   connect() {
     if (this.client) return;
 
@@ -385,6 +390,7 @@ export class Dashboard {
     this.fanControlSetting();
     this.lightControlSetting();
     this.manualControl();
+    // this.setupEmailReportPopup();
   }
 }
 // Lấy phần tử

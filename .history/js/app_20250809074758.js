@@ -54,6 +54,7 @@ class App {
         if (dashboard.logUserActivity) dashboard.logUserActivity('notification', 'Gửi thông báo thử nghiệm');
         return;
       }
+      if
     });
 
     // const btnDashboard = document.getElementById('dashBoardBtn');

@@ -385,6 +385,7 @@ export class Dashboard {
     this.fanControlSetting();
     this.lightControlSetting();
     this.manualControl();
+    this.setupEmailReportPopup();
   }
 }
 // Lấy phần tử

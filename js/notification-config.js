@@ -18,7 +18,7 @@ export class NotificationConfig {
         motion: true
       },
       sounds: {
-  temperature: 11,
+  temperature: 8,
   light: 8,
   motion: 15
       }

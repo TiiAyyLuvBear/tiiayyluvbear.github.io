@@ -62,7 +62,7 @@ export class PushsaferNotifier {
     const thresholds = this.config.getThresholds().temperature;
     const sound = this.config.getSound('temperature');
 
-    if (temperature > thresholds.high) {
+    if (temperature >= thresholds.high) {
       this.sendNotification(
         '🌡️ Cảnh báo nhiệt độ cao!',
         `Nhiệt độ hiện tại: ${temperature}°C - Vượt quá ngưỡng an toàn (${thresholds.high}°C)`,
@@ -98,6 +98,17 @@ export class PushsaferNotifier {
       this.sendNotification(
         '💡 Cảnh báo ánh sáng yếu!',
         `Độ sáng hiện tại: ${lightLevel}% - Dưới ngưỡng khuyến nghị (${thresholds.low}%)`,
+        2,
+        12,
+        sound
+      );
+      this.lastNotificationTime.light = now;
+    }
+
+    if (lightLevel >= thresholds.high) {
+      this.sendNotification(
+        '🌞 Cảnh báo ánh sáng quá mức!',
+        `Độ sáng hiện tại: ${lightLevel}% - Vượt quá ngưỡng khuyến nghị (${thresholds.high}%)`,
         2,
         12,
         sound

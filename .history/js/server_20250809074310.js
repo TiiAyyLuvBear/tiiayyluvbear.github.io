@@ -42,7 +42,7 @@ app.post('/send-report', (req, res) => {
     res.json({ success: true, message: `Đã đặt lịch gửi báo cáo định kỳ tới ${currentEmail}` });
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
 });

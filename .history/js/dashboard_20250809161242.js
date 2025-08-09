@@ -315,12 +315,14 @@ export class Dashboard {
 
     if (!notificationIcon || !emailPopup) return;
 
+    // Mở popup
     notificationIcon.addEventListener('click', () => {
       emailPopup.style.display = 'block';
       const savedEmail = localStorage.getItem('notifyEmail');
       if (savedEmail) emailInput.value = savedEmail;
     });
 
+    // Gắn listener Cancel nếu chưa gắn
     if (!cancelEmailBtn.dataset.listenerAdded) {
       cancelEmailBtn.addEventListener('click', () => {
         emailPopup.style.display = 'none';
@@ -328,9 +330,10 @@ export class Dashboard {
       cancelEmailBtn.dataset.listenerAdded = 'true';
     }
 
+    // Gắn listener Save nếu chưa gắn
     if (!saveEmailBtn.dataset.listenerAdded) {
       saveEmailBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // tránh reload form nếu có
 
         const email = emailInput.value.trim();
         if (email === '' || !email.includes('@')) {

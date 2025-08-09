@@ -315,12 +315,14 @@ export class Dashboard {
 
     if (!notificationIcon || !emailPopup) return;
 
+    // Mở popup
     notificationIcon.addEventListener('click', () => {
       emailPopup.style.display = 'block';
       const savedEmail = localStorage.getItem('notifyEmail');
       if (savedEmail) emailInput.value = savedEmail;
     });
 
+    // Gắn listener Cancel nếu chưa gắn
     if (!cancelEmailBtn.dataset.listenerAdded) {
       cancelEmailBtn.addEventListener('click', () => {
         emailPopup.style.display = 'none';

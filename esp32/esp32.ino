@@ -10,15 +10,13 @@
 DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// Pin setup
-#define LDR_PIN 34 // Analog input
-#define PIR_PIN 5  // Digital input
+#define LDR_PIN 34
+#define PIR_PIN 5
 #define BUZZER_PIN 14
 #define LED_PIR 16
 #define RELAY_FAN 18
 #define RELAY_LIGHT 19
 
-// WiFi + MQTT config
 const char *ssid = "Wokwi-GUEST";
 const char *password = "";
 const char *mqttServer = "broker.hivemq.com";
@@ -50,7 +48,6 @@ void mqttConnect()
     if (mqttClient.connect(clientId.c_str()))
     {
       Serial.println("Connected to MQTT");
-      // Bạn có thể thêm các subscribe nếu cần
       mqttClient.subscribe("23127263/esp32/temperature");
       mqttClient.subscribe("23127263/esp32/humidity");
       mqttClient.subscribe("23127263/esp32/light");
@@ -81,12 +78,12 @@ void callback(char *topic, byte *message, unsigned int length)
   {
     if (msg == "on")
     {
-      digitalWrite(RELAY_FAN, HIGH); // Bật relay quạt
+  digitalWrite(RELAY_FAN, HIGH);
       Serial.println("fan on");
     }
     else
     {
-      digitalWrite(RELAY_FAN, LOW); // Tắt
+  digitalWrite(RELAY_FAN, LOW);
       Serial.println("fan off");
     }
   }
@@ -95,7 +92,7 @@ void callback(char *topic, byte *message, unsigned int length)
   {
     if (msg == "on")
     {
-      digitalWrite(RELAY_LIGHT, HIGH); // Bật đèn
+  digitalWrite(RELAY_LIGHT, HIGH);
       Serial.println("light on");
     }
     else
@@ -129,13 +126,11 @@ void callback(char *topic, byte *message, unsigned int length)
     thresholdLightMax = msg.toInt();
   }
 }
-// Serial.println(msg);
-//  Có thể xử lý thêm ở đây
 
 void setup()
 {
   Serial.begin(115200);
-  Wire.begin(32, 33); // SDA, SCL
+  Wire.begin(32, 33);
   dht.begin();
 
   lcd.begin(16, 2);
@@ -147,7 +142,6 @@ void setup()
   pinMode(RELAY_FAN, OUTPUT);
   pinMode(RELAY_LIGHT, OUTPUT);
 
-  // WiFi & MQTT
   wifiConnect();
   mqttClient.setServer(mqttServer, mqttPort);
   mqttClient.setCallback(callback);
@@ -173,22 +167,16 @@ void loop()
   {
     lastSend = millis();
 
-    // float temp = dht.readTemperature();
-    // float hum = dht.readHumidity();
-    // int ldrValue = analogRead(LDR_PIN);
-    // int lightPercent = map(ldrValue, 0, 4095, 0, 100);
-    // bool hasMotion = digitalRead(PIR_PIN);
-    int temp = random(200, 350) / 10;                  // 20.0°C đến 35.0°C
-    int hum = random(300, 900) / 10;                   // 30.0% đến 90.0%
-    int ldrValue = random(0, 4096);                    // 0 đến 4095
-    int lightPercent = map(ldrValue, 0, 4095, 0, 100); // Ánh sáng %
-    bool hasMotion = random(0, 2);                     // 0 hoặc 1 (phát hiện chuyển động)
+  int temp = random(200, 350) / 10;
+  int hum = random(300, 900) / 10;
+  int ldrValue = random(0, 4096);
+  int lightPercent = map(ldrValue, 0, 4095, 0, 100);
+  bool hasMotion = random(0, 2);
 
     if (hasMotion)
       digitalWrite(LED_PIR, HIGH);
     else
       digitalWrite(LED_PIR, LOW);
-    // Gửi dữ liệu lên MQTT
     char buffer[10];
     sprintf(buffer, "%d", temp);
     mqttClient.publish("23127263/esp32/temperature", buffer);
@@ -201,7 +189,6 @@ void loop()
 
     sprintf(buffer, "%d", hasMotion);
     mqttClient.publish("23127263/esp32/motion", buffer);
-    // Serial log
     Serial.print("Nhiet do: ");
     Serial.print(temp);
     Serial.print(" | Do am: ");
@@ -211,7 +198,6 @@ void loop()
     Serial.print(" | PIR: ");
     Serial.println(hasMotion ? "Co nguoi" : "Khong co nguoi");
 
-    // Hiển thị lên LCD
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Temperature:");
@@ -220,7 +206,6 @@ void loop()
     lcd.print("Humidity:");
     lcd.print(hum);
 
-    // delay(1000);
     if (temp >= thresholdTempMax) tone(BUZZER_PIN, 1000, 500);
     if (temp < thresholdTempMin) tone(BUZZER_PIN, 1000, 500);
     if (temp >= thresholdLightMax) tone(BUZZER_PIN, 1000, 500);

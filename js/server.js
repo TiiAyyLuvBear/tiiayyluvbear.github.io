@@ -9,13 +9,9 @@ app.use(express.json());
 
 let currentEmail = null;
 let reportInterval = null;
-
-// Health check endpoint
 app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
 });
-
-// API nhận email từ dashboard
 app.post('/send-report', (req, res) => {
     const { email } = req.body;
 
@@ -25,15 +21,10 @@ app.post('/send-report', (req, res) => {
 
     currentEmail = email;
 
-    // Clear interval cũ
     if (reportInterval) {
         clearInterval(reportInterval);
     }
-
-    // Gửi ngay 1 lần
     sendReport(currentEmail);
-
-    // Gửi định kỳ mỗi 1 phút
     reportInterval = setInterval(() => {
         sendReport(currentEmail);
     }, 60 * 60 * 1000);

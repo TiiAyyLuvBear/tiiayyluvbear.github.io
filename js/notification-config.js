@@ -18,9 +18,9 @@ export class NotificationConfig {
         motion: true
       },
       sounds: {
-        temperature: 11, // Alarm sound
-        light: 8,        // Notification sound
-        motion: 15       // Alert sound
+  temperature: 11,
+  light: 8,
+  motion: 15
       }
     };
     

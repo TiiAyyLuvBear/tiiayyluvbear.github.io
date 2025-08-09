@@ -27,7 +27,7 @@ export class Dashboard {
     this.client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
 
     this.client.on("connect", () => {
-      console.log("Connected MQTT");
+  console.log("Connected MQTT");
       this.client.subscribe("23127263/esp32/temperature");
       this.client.subscribe("23127263/esp32/humidity");
       this.client.subscribe("23127263/esp32/light");
@@ -49,7 +49,6 @@ export class Dashboard {
         document.getElementById("tempBox").innerHTML = `🌡️ Nhiệt độ: ${value} °C`;
         this.pushNotifier.checkAndNotifyTemperature(temp);
         this.cache.temperature = temp;
-        // Kiểm tra và gửi lệnh bật/tắt buzzer nếu vượt ngưỡng nhiệt độ
         if (this.fanOn && temp >= this.fanOn) {
           this.client?.publish("23127263/esp32/control/buzzer", "on");
           console.log("🔔 Buzzer ON (nhiệt độ cao)");
@@ -73,7 +72,6 @@ export class Dashboard {
         document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${value} %`;
         this.pushNotifier.checkAndNotifyLight(light);
         this.cache.light = light;
-        // Kiểm tra và gửi lệnh bật/tắt buzzer nếu vượt ngưỡng ánh sáng
         if (this.lightOn && light <= this.lightOn) {
           this.client?.publish("23127263/esp32/control/buzzer", "on");
           console.log("🔔 Buzzer ON (ánh sáng thấp)");
@@ -88,7 +86,6 @@ export class Dashboard {
         this.cache.motion = motionValue;
       }
 
-      // Push to Firebase when a full set is collected
       if (this.cache.temperature !== undefined &&
         this.cache.humidity !== undefined &&
         this.cache.light !== undefined &&
@@ -108,7 +105,6 @@ export class Dashboard {
           time: fullTime
         };
 
-        // Ghi duy nhất vào nhánh /sensor/yyyy-mm-dd/
         const logRef = ref(getDatabase(), `/sensor/${dateStr}/`);
         push(logRef, payload)
           .then(() => console.log("✅ Dữ liệu đã được lưu vào Firebase:", payload))
@@ -118,11 +114,9 @@ export class Dashboard {
       }
     });
 
-    // Auto control loop
     setInterval(() => {
       if (!this.autoMode) return;
 
-      // If no motion, turn everything off
       if (this.motion === 0 || this.motion === null) {
         if (this.currentFanState !== "off") {
           this.client?.publish("23127263/esp32/control/fan", "off");
@@ -141,7 +135,6 @@ export class Dashboard {
         return;
       }
 
-      // Fan control
       if (this.temperature >= this.fanOn && this.currentFanState !== "on") {
         this.client?.publish("23127263/esp32/control/fan", "on");
         const fanEl2 = document.getElementById("fanSwitch");
@@ -156,7 +149,6 @@ export class Dashboard {
         logUserAction("fan_control", "auto_control: off");
       }
 
-      // Lamp control
       if (this.light <= this.lightOn && this.currentLampState !== "on") {
         this.client?.publish("23127263/esp32/control/lamp", "on");
         const lightEl2 = document.getElementById("lightSwitch");
@@ -225,7 +217,6 @@ export class Dashboard {
       this.fanOff = parseFloat(fanOff.value);
     });
 
-    // Initialize sliders with current state
     this.syncThresholdUI();
   }
 
@@ -404,23 +395,21 @@ export class Dashboard {
         this.client?.publish("23127263/esp32/threshold/lightOff", String(this.lightOff));
         console.log("sended");
 
-        // Sync UI with loaded thresholds
+       
         this.syncThresholdUI();
       } else {
-        // No thresholds yet for this user: apply sensible defaults and persist
+
         const defaults = {
-          fanOn: 30,   // turn fan ON at >= 32°C
-          fanOff: 20,  // turn fan OFF at <= 28°C
-          lightOn: 30, // turn light ON when light <= 30%
-          lightOff: 70 // turn light OFF when light >= 70%
+          fanOn: 30,   
+          fanOff: 20,  
+          lightOn: 30, 
+          lightOff: 70
         };
         this.fanOn = defaults.fanOn;
         this.fanOff = defaults.fanOff;
         this.lightOn = defaults.lightOn;
         this.lightOff = defaults.lightOff;
-        // Persist defaults for the user so future refreshes load them
         this.saveThresholdsToFirebase();
-        // Sync UI to reflect defaults immediately
         this.syncThresholdUI();
         console.log("Applied default thresholds for new user.");
       }
@@ -454,12 +443,10 @@ export class Dashboard {
     this.lightControlSetting();
     this.manualControl();
     this.setupEmailReportPopup();
-    // Extra sync in case load returned quickly
     this.syncThresholdUI();
   }
 }
 
-// Helper method to sync internal threshold values to the UI controls
 Dashboard.prototype.syncThresholdUI = function () {
   const fanOnInput = document.getElementById("fanOn");
   const fanOffInput = document.getElementById("fanOff");

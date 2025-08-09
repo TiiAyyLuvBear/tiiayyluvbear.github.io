@@ -4,7 +4,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
-  signOut
+  signOut,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -29,14 +30,13 @@ export function logUserAction(action, details = {}) {
     return;
   }
 
-  // Lấy phần trước dấu chấm cuối cùng (bỏ .com, .vn, ...)
+
   const email = user.email;
   const lastDotIndex = email.lastIndexOf(".");
   const emailPrefix = lastDotIndex !== -1 ? email.substring(0, lastDotIndex) : email;
 
-  // Ngày và giờ
   const now = new Date();
-  const dateStr = now.toISOString().split("T")[0]; // yyyy-mm-dd
+  const dateStr = now.toISOString().split("T")[0];
   const hh = String(now.getHours()).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
   const ss = String(now.getSeconds()).padStart(2, '0');
@@ -110,11 +110,32 @@ export class Auth {
         .then(() => {
           alert("Đăng ký thành công!");
           document.getElementById("signup").classList.remove("active");
-          //document.getElementById("login").classList.add("active");
         })
         .catch((error) => alert("Lỗi: " + error.message));
     });
+
+    const forgotBtn = document.getElementById("forgotPasswordBtn");
+    forgotBtn?.addEventListener("click", (event) => {
+        event.preventDefault();
+        const email = document.getElementById("username").value.trim();
+        if (!email) {
+          alert("Vui lòng nhập email để reset mật khẩu");
+          return;
+        }
+
+        sendPasswordResetEmail(this.auth, email)
+          .then(() => {
+            alert("Email đặt lại mật khẩu đã được gửi tới: " + email);
+          })
+          .catch((error) => {
+            alert("Lỗi gửi email reset: " + error.message);
+          });
+    });
+
+    
   }
+
+  
 
   init(callbackOnLoginSuccess) {
     this.setupLogin(callbackOnLoginSuccess);
@@ -123,7 +144,6 @@ export class Auth {
 
   logout(callbackOnSuccess) {
     signOut(this.auth).then(() => {
-      // logUserAction("logout", "Đăng xuất thành cxông");
       console.log("Signed out from Firebase");
       callbackOnSuccess();
     });

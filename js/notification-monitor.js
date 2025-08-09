@@ -3,7 +3,7 @@ import { app } from './auth.js';
 
 const db = getDatabase(app);
 
-const PUSHSAFER_KEY = 'YyS1c3Dl4NN20ckONcl5'; // 🔁 Thay bằng key của bạn
+const PUSHSAFER_KEY = 'YyS1c3Dl4NN20ckONcl5';
 
 function sendPushNotification(title, message) {
   fetch('https://www.pushsafer.com/api', {
@@ -12,10 +12,10 @@ function sendPushNotification(title, message) {
       k: PUSHSAFER_KEY,
       t: title,
       m: message,
-      v: 1, // vibration
-      i: 1, // icon
-      s: 1, // sound
-      d: '', // device (nếu muốn chỉ gửi 1 thiết bị)
+  v: 1,
+  i: 1,
+  s: 1,
+  d: '',
     }),
   })
     .then(res => res.json())
@@ -29,7 +29,7 @@ function sendPushNotification(title, message) {
 }
 
 export function startMonitoring() {
-  const sensorRef = ref(db, 'sensors'); // 🔁 Đường dẫn tới dữ liệu của bạn
+  const sensorRef = ref(db, 'sensors');
 
   onValue(sensorRef, (snapshot) => {
     const data = snapshot.val();
@@ -37,7 +37,6 @@ export function startMonitoring() {
 
     const { temperature, light, human } = data;
 
-    // 🔥 Đặt ngưỡng
     const maxTemp = 40;
     const minTemp = 10;
     const minLight = 50;

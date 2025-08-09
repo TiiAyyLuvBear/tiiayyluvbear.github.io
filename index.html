@@ -4,33 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard IoT</title>
-
-  <!-- Thư viện ngoài -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- Nội dung sẽ được load vào đây -->
   <div id="content"></div>
-
-  <!-- JavaScript load các file HTML con -->
   <script>
     async function loadHTML(file) {
       const res = await fetch(file);
       const html = await res.text();
       document.getElementById('content').insertAdjacentHTML('beforeend', html);
     }
-
-    // Nạp lần lượt các phần
     loadHTML('tabs/login.html');
     loadHTML('tabs/dashboard.html');
     loadHTML('tabs/chart.html');
-    loadHTML('tabs/notification-settings.html');  
+    loadHTML('tabs/notification-settings.html');
   </script>
-
-  <!-- JavaScript chính -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

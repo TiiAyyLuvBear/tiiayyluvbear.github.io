@@ -6,7 +6,7 @@ const firebaseURL = process.env.FIREBASE_URL;
 
 async function sendReport(toEmail) {
     if (!toEmail) {
-        console.warn("⚠ Không có email để gửi báo cáo");
+    console.warn("⚠ Không có email để gửi báo cáo");
         return;
     }
 

@@ -1,5 +1,3 @@
-/* style.css */
-
 body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
@@ -130,7 +128,6 @@ h2 {
   font-size: 18px;
 }
 
-/* Login tab */
 #login {
   padding: 50px;
   text-align: center;
@@ -163,7 +160,6 @@ h2 {
   font-weight: bold;
 }
 
-/* Chart tab */
 #chart {
   padding: 20px;
   text-align: center;
@@ -237,7 +233,6 @@ canvas {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  /* Làm mờ nền */
   display: none;
   justify-content: center;
   align-items: center;
@@ -255,7 +250,6 @@ canvas {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  /* Làm mờ nền */
   display: none;
   justify-content: center;
   align-items: center;
@@ -493,7 +487,6 @@ input:checked+.slider:before {
   background-color: green;
 }
 
-/* Popup Email Nhận Báo Cáo */
 #emailPopup {
   display: none;
   position: fixed;

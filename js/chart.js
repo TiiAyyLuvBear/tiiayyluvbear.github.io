@@ -7,7 +7,7 @@ export class ChartDrawer {
     this.db = getDatabase();
     this.interval = null;
     this.startDate = null;
-    this.noDataAlerted = false; // <--- Cờ để tránh alert nhiều lần
+  this.noDataAlerted = false; 
   }
 
   async drawChart(startDate) {
@@ -20,8 +20,8 @@ export class ChartDrawer {
       if (!snapshot.exists()) {
         console.warn(`Không có dữ liệu cho ngày ${startDate}`);
 
-        // Chỉ alert nếu chưa cảnh báo trước đó
-        if (!this.noDataAlerted) {
+
+  if (!this.noDataAlerted) {
           alert(`Không có dữ liệu cho ngày ${startDate}`);
           this.noDataAlerted = true;
         }
@@ -33,7 +33,7 @@ export class ChartDrawer {
         return;
       }
 
-      // Nếu có dữ liệu → reset lại cờ cảnh báo
+
       this.noDataAlerted = false;
 
       const data = snapshot.val();
@@ -49,12 +49,12 @@ export class ChartDrawer {
 
       const canvas = document.getElementById("tempChart");
       if (!canvas) {
-        console.warn("Không tìm thấy phần tử tempChart để vẽ biểu đồ");
+  console.warn("Không tìm thấy phần tử tempChart để vẽ biểu đồ");
         return;
       }
 
   const ctx = canvas.getContext("2d");
-  // Chart is provided via CDN in index.html as global
+
 
       if (this.chartInstance) {
         this.chartInstance.destroy();
@@ -99,7 +99,7 @@ export class ChartDrawer {
             },
             title: {
               display: true,
-              //text: "Biểu đồ nhiệt độ, độ ẩm và ánh sáng theo thời gian"
+
             }
           },
           scales: {
@@ -134,7 +134,7 @@ export class ChartDrawer {
 
       signOut(auth).then(() => {
         console.log("Signed out from Firebase");
-        if (this.interval) clearInterval(this.interval); // Ngừng cập nhật biểu đồ
+        if (this.interval) clearInterval(this.interval);
         callbackOnSuccess();
       });
     });
@@ -198,7 +198,7 @@ export class ChartDrawer {
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${yyyy}-${mm}-${dd}`; // đúng định dạng yyyy-mm-dd
+    const todayStr = `${yyyy}-${mm}-${dd}`;
 
     document.getElementById("startDate").value = todayStr;
     this.startDate = todayStr;

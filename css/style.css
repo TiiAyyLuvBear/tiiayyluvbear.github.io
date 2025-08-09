@@ -28,6 +28,7 @@ header {
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 16px;
 }
 
 .right-header {
@@ -43,6 +44,7 @@ header {
   background-color: #bfbce0;
   cursor: pointer;
   font-weight: bold;
+  font-size: 16px;
 }
 
 .container {
@@ -67,18 +69,25 @@ h2 {
   margin-top: 10px;
 }
 
+/* status-box to hơn */
 .status-box {
   background-color: #b3d3ee;
-  padding: 20px;
+  padding: 15px; /* tăng padding để box to */
   border-radius: 12px;
-  font-size: 18px;
+  font-size: 25px; /* tăng font */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  height: 130px; /* đặt chiều cao cố định cho đều */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
 }
 
 .control-box {
   background-color: #b3d3ee;
   padding: 20px;
   border-radius: 12px;
+  font-size: 25px;
   text-align: center;
   margin-bottom: 20px;
 }

@@ -1,19 +1,124 @@
-  <div id="login" class="tab">
-    <h2>Đăng nhập</h2>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đăng nhập - Hệ thống quản lý phòng thông minh</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+    .tab {
+      display: none;
+    }
+    .tab.active {
+      display: block;
+    }
+    /* Container chung cho login & signup */
+    #login, #signup {
+      max-width: 360px;
+      margin: 60px auto;
+      padding: 30px 40px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      font-size: 16px;
+      color: #1b2a41;
+    }
+    /* Tiêu đề */
+    #login h1, #signup h2 {
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+    /* Input */
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 1.8px solid #ccc;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #77A8C6;
+    }
+    /* Nút chính */
+    button.primary-btn {
+      width: 100%;
+      padding: 14px 0;
+      margin-top: 15px;
+      font-weight: 700;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background-color: #77A8C6;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button.primary-btn:hover {
+      background-color: #EEE
+    }
+    /* Nút phụ */
+    button.secondary-btn {
+      background-color: #eee;
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button.secondary-btn:hover {
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Đăng nhập -->
+  <div id="login" class="tab active">
+    <h1>Đăng nhập</h1>
     <input id="username" placeholder="Tên đăng nhập" />
     <input id="password" type="password" placeholder="Mật khẩu" />
-    <br />
-    <button id="loginBtn">Đăng nhập</button>
-    <button id="signupBtn">Đăng kí</button>
-    <button id="forgotPasswordBtn" type="button">Quên mật khẩu?</button>
+    <button id="loginBtn" class="primary-btn">Đăng nhập</button>
+    <button id="signupBtn" class="secondary-btn">Đăng kí</button>
+    <button id="forgotPasswordBtn" type="button" class="secondary-btn">Quên mật khẩu?</button>
   </div>
 
+  <!-- Đăng ký -->
   <div id="signup" class="tab">
     <h2>Đăng ký tài khoản</h2>
     <input id="signupEmail" type="email" placeholder="Email" />
     <input id="signupPassword" type="password" placeholder="Mật khẩu" />
     <input id="signupConfirm" type="password" placeholder="Xác nhận mật khẩu" />
-    <br />
-    <button id="submitSignupBtn">Tạo tài khoản</button>
-    <button id="backToLoginBtn">⬅ Quay lại đăng nhập</button>
+    <button id="submitSignupBtn" class="primary-btn">Tạo tài khoản</button>
+    <button id="backToLoginBtn" class="secondary-btn">⬅ Quay lại đăng nhập</button>
   </div>
+
+  <script>
+    // Đơn giản chuyển tab đăng nhập/đăng ký
+    const loginTab = document.getElementById('login');
+    const signupTab = document.getElementById('signup');
+    document.getElementById('signupBtn').onclick = () => {
+      loginTab.classList.remove('active');
+      signupTab.classList.add('active');
+    }
+    document.getElementById('backToLoginBtn').onclick = () => {
+      signupTab.classList.remove('active');
+      loginTab.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>

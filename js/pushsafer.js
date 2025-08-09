@@ -61,7 +61,7 @@ export class PushsaferNotifier {
     }
 
     const thresholds = this.config.getThresholds().temperature;
-    const sound = this.config.getSounds().temperature;
+    const sound = this.config.getSound('temperature');
 
     if (temperature > thresholds.high) {
       this.sendNotification(
@@ -93,7 +93,7 @@ export class PushsaferNotifier {
     }
 
     const thresholds = this.config.getThresholds().light;
-    const sound = this.config.getSounds().light;
+    const sound = this.config.getSound('light');
 
     if (lightLevel < thresholds.low) {
       this.sendNotification(
@@ -115,7 +115,7 @@ export class PushsaferNotifier {
       return; // Still in cooldown
     }
 
-    const sound = this.config.getSounds().motion;
+    const sound = this.config.getSound('motion');
 
     if (motionDetected) {
       this.sendNotification(

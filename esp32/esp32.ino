@@ -27,6 +27,8 @@ int mqttPort = 1883;
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
+int thresholdTempMax, thresholdTempMin, thresholdLightMax, thresholdLightMin;
+
 void wifiConnect()
 {
   WiFi.begin(ssid, password);
@@ -101,6 +103,30 @@ void callback(char *topic, byte *message, unsigned int length)
       digitalWrite(RELAY_LIGHT, LOW);
       Serial.println("light off");
     }
+  }
+
+  if (String(topic) == "23127263/esp32/threshold/fanOn")
+  {
+    Serial.println(msg.toInt());
+    thresholdTempMax = msg.toInt();
+  }
+
+  if (String(topic) == "23127263/esp32/threshold/fanOff")
+  {
+    Serial.println(msg.toInt());
+    thresholdTempMin = msg.toInt();
+  }
+
+  if (String(topic) == "23127263/esp32/threshold/lightOn")
+  {
+    Serial.println(msg.toInt());
+    thresholdLightMin = msg.toInt();
+  }
+
+  if (String(topic) == "23127263/esp32/threshold/lightOff")
+  {
+    Serial.println(msg.toInt());
+    thresholdLightMax = msg.toInt();
   }
 }
 // Serial.println(msg);
@@ -195,24 +221,9 @@ void loop()
     lcd.print(hum);
 
     // delay(1000);
-    // int thresholdTempMax, thresholdTempMin, thresholdLight;
-
-    // void getThresholdsFromFirebase() {
-    //   if (Firebase.RTDB.getInt(&fbdo, "thresholds/temperatureMax")) {
-    //     thresholdTempMax = fbdo.intData();
-    //   }
-    //   if (Firebase.RTDB.getInt(&fbdo, "thresholds/temperatureMin")) {
-    //     thresholdTempMin = fbdo.intData();
-    //   }
-    //   if (Firebase.RTDB.getInt(&fbdo, "thresholds/lightMin")) {
-    //     thresholdLight = fbdo.intData();
-    //   }
-    // }
-
-    // if (temp > thresholdTempMax || temp < thresholdTempMin || ldrValue < thresholdLight) {
-    //   digitalWrite(buzzerPin, HIGH);
-    //   delay(1000);
-    //   digitalWrite(buzzerPin, LOW);
-    // }
+    if (temp >= thresholdTempMax) tone(BUZZER_PIN, 1000, 500);
+    if (temp < thresholdTempMin) tone(BUZZER_PIN, 1000, 500);
+    if (temp >= thresholdLightMax) tone(BUZZER_PIN, 1000, 500);
+    if (temp < thresholdLightMin) tone(BUZZER_PIN, 1000, 500);
   }
 }

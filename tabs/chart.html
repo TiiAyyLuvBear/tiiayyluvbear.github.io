@@ -7,21 +7,22 @@
     <div class="right-header">
       <button id="usernameDisplay2"> admin </button>
       <button id="logoutBtn2">Đăng xuất</button>
-      <span class="icon">🔔</span>
+      <!-- <span class="icon">🔔</span> -->
     </div>
   </header>
 
   <h2>Biểu đồ nhiệt độ, độ ẩm và ánh sáng</h2>
 
   <!-- Bộ chọn ngày -->
-  <div style="margin-bottom: 10px;">
-    <label for="startDate">Từ ngày:</label>
+  <div style="margin-bottom: 10px; text-align: center;">
+    <label for="startDate">Chọn ngày:</label>
     <input type="date" id="startDate">
 
     <button id="filterBtn">Xem biểu đồ</button>
   </div>
 
-  <canvas id="tempChart" width="600" height="300"></canvas>
-  <br />
+  <div style="display: flex; justify-content: center;">
+    <canvas id="tempChart" width="600" height="300"></canvas>
+  </div>
   <!-- <button id="backBtn">Quay lại</button> -->
 </div>

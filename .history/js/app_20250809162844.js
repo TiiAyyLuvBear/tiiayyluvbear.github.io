@@ -4,7 +4,7 @@ import { ChartDrawer } from './chart.js';
 import { NotificationConfig } from './notification-config.js';
 import { PushsaferNotifier } from './pushsafer.js';
 import { startMonitoring } from './notification-monitor.js';
-import { logUserAction } from './auth.js';
+
 
 const auth = new Auth();
 const dashboard = new Dashboard();
@@ -36,19 +36,19 @@ class App {
       if (target.id === 'chartBtn') {
         this.showTab('chart');
         chart.init(() => this.handleLogout());
-        logUserAction('navigation', 'Xem trang thống kê');
+        ('navigation', 'Xem trang thống kê');
         return;
       }
 
       if (target.id === 'notificationBtn') {
         this.showTab('notification');
-        logUserAction('navigation', 'Xem cài đặt thông báo');
+        if (dashboard.logUserActivity) dashboard.logUserActivity('navigation', 'Xem cài đặt thông báo');
         return;
       }
 
       if (target.id === 'testNotificationBtn') {
         pushsaferNotifier.testNotification();
-        logUserAction('notification', 'Gửi thông báo thử nghiệm');
+        if (dashboard.logUserActivity) dashboard.logUserActivity('notification', 'Gửi thông báo thử nghiệm');
         return;
       }
     });
@@ -56,7 +56,7 @@ class App {
     document.addEventListener('click', (e) => {
       if (e.target && e.target.id === 'dashBoardBtn') {
         this.showTab('dashboard');
-        logUserAction('navigation', 'Quay về trang chính');
+        if (dashboard.logUserActivity) dashboard.logUserActivity('navigation', 'Quay về trang chính');
       }
 
       if (e.target && e.target.id === 'logoutBtn') {

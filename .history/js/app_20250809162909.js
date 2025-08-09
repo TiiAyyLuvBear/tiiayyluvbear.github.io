@@ -42,13 +42,13 @@ class App {
 
       if (target.id === 'notificationBtn') {
         this.showTab('notification');
-        logUserAction('navigation', 'Xem cài đặt thông báo');
+        if (dashboard.logUserActivity) dashboard.logUserActivity('navigation', 'Xem cài đặt thông báo');
         return;
       }
 
       if (target.id === 'testNotificationBtn') {
         pushsaferNotifier.testNotification();
-        logUserAction('notification', 'Gửi thông báo thử nghiệm');
+        if (dashboard.logUserActivity) dashboard.logUserActivity('notification', 'Gửi thông báo thử nghiệm');
         return;
       }
     });
@@ -56,7 +56,7 @@ class App {
     document.addEventListener('click', (e) => {
       if (e.target && e.target.id === 'dashBoardBtn') {
         this.showTab('dashboard');
-        logUserAction('navigation', 'Quay về trang chính');
+        if (dashboard.logUserActivity) dashboard.logUserActivity('navigation', 'Quay về trang chính');
       }
 
       if (e.target && e.target.id === 'logoutBtn') {

@@ -7,7 +7,7 @@ export class ChartDrawer {
     this.db = getDatabase();
     this.interval = null;
     this.startDate = null;
-    this.noDataAlerted = false;
+  this.noDataAlerted = false; 
   }
 
   async drawChart(startDate) {
@@ -21,7 +21,7 @@ export class ChartDrawer {
         console.warn(`Không có dữ liệu cho ngày ${startDate}`);
 
 
-        if (!this.noDataAlerted) {
+  if (!this.noDataAlerted) {
           alert(`Không có dữ liệu cho ngày ${startDate}`);
           this.noDataAlerted = true;
         }
@@ -49,11 +49,11 @@ export class ChartDrawer {
 
       const canvas = document.getElementById("tempChart");
       if (!canvas) {
-        console.warn("Không tìm thấy phần tử tempChart để vẽ biểu đồ");
+  console.warn("Không tìm thấy phần tử tempChart để vẽ biểu đồ");
         return;
       }
 
-      const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d");
 
 
       if (this.chartInstance) {
@@ -202,7 +202,7 @@ export class ChartDrawer {
 
     document.getElementById("startDate").value = todayStr;
     this.startDate = todayStr;
-
+  
     const user = auth.currentUser;
     if (!user || !user.email) {
       console.error("Chưa đăng nhập hoặc không có email");

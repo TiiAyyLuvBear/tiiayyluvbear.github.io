@@ -341,8 +341,8 @@ export class Dashboard {
         localStorage.setItem('notifyEmail', email);
 
         try {
-          const serverUrl = "http://192.168.74.19:5000";
-          const res = await fetch(`${serverUrl}/send-report`, {
+          const url = "http://192.168.74.19:5500";
+          fetch(url + '/send-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })

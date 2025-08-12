@@ -9,6 +9,7 @@ export class NotificationConfig {
           low: 10
         },
         light: {
+          high: 80,
           low: 20
         }
       },

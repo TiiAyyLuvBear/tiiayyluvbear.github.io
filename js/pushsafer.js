@@ -65,7 +65,7 @@ export class PushsaferNotifier {
     if (temperature >= thresholds.high) {
       this.sendNotification(
         '🌡️ Cảnh báo nhiệt độ cao!',
-        `Nhiệt độ hiện tại: ${temperature}°C - Vượt quá ngưỡng an toàn (${thresholds.high}°C)`,
+        `Nhiệt độ hiện tại: ${temperature}°C - Vượt quá ngưỡng (${thresholds.high}°C)`,
         3,
         2,
         sound
@@ -74,7 +74,7 @@ export class PushsaferNotifier {
     } else if (temperature < thresholds.low) {
       this.sendNotification(
         '🧊 Cảnh báo nhiệt độ thấp!',
-        `Nhiệt độ hiện tại: ${temperature}°C - Dưới ngưỡng an toàn (${thresholds.low}°C)`,
+        `Nhiệt độ hiện tại: ${temperature}°C - Dưới ngưỡng (${thresholds.low}°C)`,
         3,
         2,
         sound
@@ -84,38 +84,34 @@ export class PushsaferNotifier {
   }
 
   checkAndNotifyLight(lightLevel) {
-    if (!this.config.isNotificationEnabled('light')) return;
+  if (!this.config.isNotificationEnabled('light')) return;
 
-    const now = Date.now();
-    if (now - this.lastNotificationTime.light < this.cooldownTime) {
-      return;
-    }
+  const now = Date.now();
+  if (now - this.lastNotificationTime.light < this.cooldownTime) return;
 
-    const thresholds = this.config.getThresholds().light;
-    const sound = this.config.getSound('light');
+  const thresholds = this.config.getThresholds().light;
+  const sound = this.config.getSound('light');
 
-    if (lightLevel < thresholds.low) {
-      this.sendNotification(
-        '💡 Cảnh báo ánh sáng yếu!',
-        `Độ sáng hiện tại: ${lightLevel}% - Dưới ngưỡng khuyến nghị (${thresholds.low}%)`,
-        2,
-        12,
-        sound
-      );
-      this.lastNotificationTime.light = now;
-    }
-
-    if (lightLevel >= thresholds.high) {
-      this.sendNotification(
-        '🌞 Cảnh báo ánh sáng quá mức!',
-        `Độ sáng hiện tại: ${lightLevel}% - Vượt quá ngưỡng khuyến nghị (${thresholds.high}%)`,
-        2,
-        12,
-        sound
-      );
-      this.lastNotificationTime.light = now;
-    }
+  if (lightLevel < thresholds.low) {
+    this.sendNotification(
+      '💡 Cảnh báo ánh sáng yếu!',
+      `Độ sáng: ${lightLevel}% - Dưới ngưỡng (${thresholds.low}%)`,
+      2,
+      12,
+      sound
+    );
+    this.lastNotificationTime.light = now;
+  } else if (lightLevel >= thresholds.high) {
+    this.sendNotification(
+      '🌞 Cảnh báo ánh sáng quá mức!',
+      `Độ sáng: ${lightLevel}% - Vượt quá ngưỡng (${thresholds.high}%)`,
+      2,
+      12,
+      sound
+    );
+    this.lastNotificationTime.light = now;
   }
+}
 
   checkAndNotifyMotion(motionDetected) {
     if (!this.config.isNotificationEnabled('motion')) return;

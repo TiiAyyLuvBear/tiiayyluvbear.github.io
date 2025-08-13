@@ -52,11 +52,10 @@ export class Dashboard {
         if (this.fanOn && temp >= this.fanOn) {
           this.client?.publish("23127263/esp32/control/buzzer", "on");
           console.log("🔔 Buzzer ON (nhiệt độ cao)");
-        } else if (this.fanOff && temp <= this.fanOff) {
+        } else if (this.fanOff && temp < this.fanOff) {
           this.client?.publish("23127263/esp32/control/buzzer", "on");
           console.log("🔔 Buzzer ON (nhiệt độ thấp)");
         }
-
       }
 
       if (key === "humidity") {
@@ -72,9 +71,13 @@ export class Dashboard {
         document.getElementById("lightBox").innerHTML = `💡 Độ sáng: ${value} %`;
         this.pushNotifier.checkAndNotifyLight(light);
         this.cache.light = light;
-        if (this.lightOn && light <= this.lightOn) {
+        if (this.lightOn && light < this.lightOn) {
           this.client?.publish("23127263/esp32/control/buzzer", "on");
           console.log("🔔 Buzzer ON (ánh sáng thấp)");
+        }
+        if (this.lightOff && light >= this.lightOff) {
+          this.client?.publish("23127263/esp32/control/buzzer", "on");
+          console.log("🔔 Buzzer ON (ánh sáng cao)");
         }
       }
 

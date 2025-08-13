@@ -400,9 +400,20 @@ export class Dashboard {
         this.lightOn = data.lightOn ?? this.lightOn;
         this.lightOff = data.lightOff ?? this.lightOff;
 
+        this.pushNotifier.updateThresholds({
+          temperature: { 
+            high: this.fanOn,
+            low: this.fanOff 
+          },
+          light: {
+            low: this.lightOn,
+            high: this.lightOff
+          }
+        });
+
         this.client?.publish("23127263/esp32/threshold/fanOn", String(this.fanOn));
         this.client?.publish("23127263/esp32/threshold/fanOff", String(this.fanOff));
-        this.client?.publish("23127263/esp32/threshold/lightOn", String(this.lightnOn));
+        this.client?.publish("23127263/esp32/threshold/lightOn", String(this.lightOn));
         this.client?.publish("23127263/esp32/threshold/lightOff", String(this.lightOff));
         console.log("sended");
 
@@ -412,8 +423,8 @@ export class Dashboard {
 
         const defaults = {
           fanOn: 30,
-          fanOff: 15,
-          lightOn: 35,
+          fanOff: 20,
+          lightOn: 25,
           lightOff: 75
         };
         this.fanOn = defaults.fanOn;

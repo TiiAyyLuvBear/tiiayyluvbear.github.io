@@ -5,12 +5,12 @@ export class NotificationConfig {
       pushsaferKey: 'AjbLd7QiEQ2qUeBlvt1R',
       thresholds: {
         temperature: {
-          high: 35,
-          low: 10
+          high: 30,
+          low: 20
         },
         light: {
-          high: 80,
-          low: 20
+          high: 75,
+          low: 25
         }
       },
       notifications: {

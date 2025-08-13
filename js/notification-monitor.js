@@ -38,7 +38,7 @@ export function startMonitoring() {
     const { temperature, light, human } = data;
 
     const maxTemp = 30;
-    const minTemp = 15;
+    const minTemp = 20;
     const minLight = 25;
     const maxLight = 75;
 

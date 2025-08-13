@@ -11,7 +11,7 @@ export class PushsaferNotifier {
       light: 0,
       motion: 0
     };
-    this.cooldownTime = 60000;
+    this.cooldownTime = 10000;
   }
 
   async sendNotification(title, message, vibration = 1, icon = 1, sound = '') {

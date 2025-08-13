@@ -37,19 +37,26 @@ export function startMonitoring() {
 
     const { temperature, light, human } = data;
 
-    const maxTemp = 40;
-    const minTemp = 10;
-    const minLight = 50;
+    const maxTemp = 30;
+    const minTemp = 15;
+    const minLight = 25;
+    const maxLight = 75;
 
-    if (temperature > maxTemp) {
+    if (temperature >= maxTemp) {
       sendPushNotification("🌡️ Nhiệt độ cao!", `Nhiệt độ hiện tại là ${temperature}°C`);
-    } else if (temperature < minTemp) {
+    } 
+    if (temperature < minTemp) {
       sendPushNotification("❄️ Nhiệt độ thấp!", `Nhiệt độ hiện tại là ${temperature}°C`);
     }
 
     if (light < minLight) {
       sendPushNotification("💡 Ánh sáng yếu", `Ánh sáng hiện tại là ${light}`);
     }
+    if (light >= maxLight) {
+      sendPushNotification("💡 Ánh sáng mạnh", `Ánh sáng hiện tại là ${light}`);
+    }
+
+    
 
     if (human === true) {
       sendPushNotification("🚶 Phát hiện chuyển động", "Có người vừa được phát hiện!");

@@ -10,7 +10,7 @@ export class Dashboard {
     this.temperature = 0;
     this.humidity = 0;
     this.light = 0;
-    this.motion = 'Không có người';
+    this.motion = 0;
     this.cache = {};
     this.autoMode = false;
     this.fanOn = 0;
@@ -80,7 +80,7 @@ export class Dashboard {
 
       if (key === "motion") {
         const motionValue = parseInt(value);
-        this.motion = motionValue ? 'Có người' : 'Không có người';
+        this.motion = motionValue;
         const motionBox = document.getElementById("motionBox");
         if (motionBox) motionBox.innerHTML = `👤 Trạng thái: ${motionValue === 1 ? 'Có người' : 'Không có người'}`;
         this.cache.motion = motionValue;
@@ -138,7 +138,7 @@ export class Dashboard {
       if (this.temperature >= this.fanOn && this.currentFanState !== "on") {
         this.client?.publish("23127263/esp32/control/fan", "on");
         const fanEl2 = document.getElementById("fanSwitch");
-        if (fanEl2) fanEl2.checked = true;
+        if (fanEl2) fanEl2.checked = true;  
         this.currentFanState = "on";
         logUserAction("fan_control", "auto_control: on");
       } else if (this.temperature <= this.fanOff && this.currentFanState !== "off") {
@@ -162,7 +162,7 @@ export class Dashboard {
         this.currentLampState = "off";
         logUserAction("lamp_control", "auto_control: off");
       }
-    }, 5000);
+    }, 1000);
 
     this.autoControl();
   }

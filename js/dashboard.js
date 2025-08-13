@@ -141,7 +141,7 @@ export class Dashboard {
       if (this.temperature >= this.fanOn && this.currentFanState !== "on") {
         this.client?.publish("23127263/esp32/control/fan", "on");
         const fanEl2 = document.getElementById("fanSwitch");
-        if (fanEl2) fanEl2.checked = true;  
+        if (fanEl2) fanEl2.checked = true;
         this.currentFanState = "on";
         logUserAction("fan_control", "auto_control: on");
       } else if (this.temperature <= this.fanOff && this.currentFanState !== "off") {
@@ -165,7 +165,7 @@ export class Dashboard {
         this.currentLampState = "off";
         logUserAction("lamp_control", "auto_control: off");
       }
-    }, 1000);
+    }, 100);
 
     this.autoControl();
   }

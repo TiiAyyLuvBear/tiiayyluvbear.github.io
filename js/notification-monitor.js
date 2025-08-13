@@ -3,7 +3,7 @@ import { app } from './auth.js';
 
 const db = getDatabase(app);
 
-const PUSHSAFER_KEY = 'YyS1c3Dl4NN20ckONcl5';
+const PUSHSAFER_KEY = 'AjbLd7QiEQ2qUeBlvt1R';
 
 function sendPushNotification(title, message) {
   fetch('https://www.pushsafer.com/api', {

@@ -16,7 +16,7 @@ export class PushsaferNotifier {
 
   async sendNotification(title, message, vibration = 1, icon = 1, sound = '') {
     if (!this.privateKey) {
-      this.privateKey = 'YyS1c3Dl4NN20ckONcl5';
+      this.privateKey = 'AjbLd7QiEQ2qUeBlvt1R';
       console.warn('Pushsafer private key not configured, using default key');
     }
 

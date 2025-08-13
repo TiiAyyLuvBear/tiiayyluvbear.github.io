@@ -1,7 +1,7 @@
 import { PushsaferNotifier } from './pushsafer.js';
 
 const notifier = new PushsaferNotifier();
-notifier.setPushsaferKey('EYyS1c3Dl4NN20ckONcl5');
+notifier.setPushsaferKey('AjbLd7QiEQ2qUeBlvt1R');
 
 document.getElementById("testNotificationBtn")?.addEventListener("click", () => {
   notifier.testNotification();

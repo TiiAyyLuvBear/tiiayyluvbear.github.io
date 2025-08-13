@@ -127,8 +127,6 @@ Publish topics (ESP32 → HiveMQ):
 - 1: Default
 - 8: Notification  
 - 11: Alarm
-- 15: Alert
-- 22: Emergency
 
 ### Icons:
 - 1: Default
